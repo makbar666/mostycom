@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MOSTYCOM - Template Landing Page Traveler</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+  </style>
+</head>
+<body class="text-slate-700">
+  <!-- Header / Navbar -->
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="text-2xl font-bold text-sky-500">MOSTYCOM</div>
+        <nav class="hidden lg:flex space-x-6 text-sm font-medium text-slate-600">
+          <a href="#home" class="hover:text-sky-500">Home</a>
+          <a href="#trip" class="hover:text-sky-500">Trip</a>
+          <a href="#tracking" class="hover:text-sky-500">Tracking</a>
+          <a href="#artikel" class="hover:text-sky-500">Artikel</a>
+          <a href="#testimoni" class="hover:text-sky-500">Testimoni</a>
+          <a href="#faq" class="hover:text-sky-500">FAQ</a>
+          <a href="#tentang" class="hover:text-sky-500">Tentang Kami</a>
+          <a href="#contact" class="hover:text-sky-500">Contact</a>
+        </nav>
+        <a href="#contact" class="hidden lg:inline-flex items-center rounded-full bg-sky-500 px-5 py-2 text-white text-sm font-semibold shadow hover:bg-sky-600 transition">Booking Now</a>
+        <button class="lg:hidden inline-flex items-center" aria-label="Toggle menu" id="mobile-menu-btn">
+          <svg class="w-8 h-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+      <div id="mobile-menu" class="lg:hidden hidden pb-4">
+        <div class="flex flex-col space-y-2 text-sm font-medium text-slate-600">
+          <a href="#home" class="py-2 border-b border-slate-100">Home</a>
+          <a href="#trip" class="py-2 border-b border-slate-100">Trip</a>
+          <a href="#tracking" class="py-2 border-b border-slate-100">Tracking</a>
+          <a href="#artikel" class="py-2 border-b border-slate-100">Artikel</a>
+          <a href="#testimoni" class="py-2 border-b border-slate-100">Testimoni</a>
+          <a href="#faq" class="py-2 border-b border-slate-100">FAQ</a>
+          <a href="#tentang" class="py-2 border-b border-slate-100">Tentang Kami</a>
+          <a href="#contact" class="py-2">Contact</a>
+          <a href="#contact" class="inline-flex items-center justify-center rounded-full bg-sky-500 px-5 py-2 text-white text-sm font-semibold shadow hover:bg-sky-600 transition">Booking Now</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="overflow-hidden">
+    <!-- Hero Section -->
+    <section id="home" class="relative">
+      <div class="relative min-h-[90vh] flex items-center bg-slate-900/40">
+        <div class="absolute inset-0">
+          <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80" alt="Traveler hero" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-slate-900/60"></div>
+        </div>
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white py-24">
+          <p class="text-sm uppercase tracking-[0.3em] text-sky-300">Traveler Experience</p>
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight mt-4">Explore The World With Us</h1>
+          <p class="mt-6 text-lg sm:text-xl text-slate-100 max-w-2xl">Open Trip &amp; Private Trip ke berbagai benua. Nikmati pengalaman eksklusif dengan itinerary terbaik dan host profesional.</p>
+          <div class="mt-8 flex flex-col sm:flex-row gap-4">
+            <a href="#trip" class="inline-flex items-center justify-center rounded-full bg-sky-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-400 transition">Lihat Jadwal Trip</a>
+            <a href="#tracking" class="inline-flex items-center justify-center rounded-full border border-white/70 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">Tracking Trip</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter Jadwal Trip -->
+    <section id="trip" class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div>
+            <p class="text-sm font-semibold uppercase text-sky-500">Jadwal Trip</p>
+            <h2 class="text-3xl font-semibold text-slate-900 mt-2">Temukan Trip Favorit per Benua</h2>
+            <p class="text-slate-500 mt-2 max-w-2xl">Filter trip kami berdasarkan benua untuk menemukan penawaran terbaik di Asia, Eropa, Afrika, Amerika, dan Oceania.</p>
+          </div>
+          <div class="flex flex-wrap gap-2" id="filter-buttons">
+            <button class="filter-btn active" data-filter="all">Semua</button>
+            <button class="filter-btn" data-filter="asia">Asia</button>
+            <button class="filter-btn" data-filter="eropa">Eropa</button>
+            <button class="filter-btn" data-filter="afrika">Afrika</button>
+            <button class="filter-btn" data-filter="amerika">Amerika</button>
+            <button class="filter-btn" data-filter="oceania">Oceania</button>
+          </div>
+        </div>
+
+        <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" id="trip-grid">
+          <article class="trip-card" data-benua="asia">
+            <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=80" alt="Japan Trip" class="trip-img" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-slate-900">Hanami Japan Adventure</h3>
+              <p class="text-sky-500 font-semibold mt-2">Rp 18.500.000</p>
+              <div class="mt-3 text-sm text-slate-500 space-y-1">
+                <p>Durasi: 8 Hari</p>
+                <p>Lokasi: Tokyo, Kyoto, Osaka</p>
+              </div>
+              <button class="trip-btn" data-trip="hanami">Detail Trip</button>
+            </div>
+          </article>
+
+          <article class="trip-card" data-benua="eropa">
+            <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=600&q=80" alt="Swiss Trip" class="trip-img" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-slate-900">Swiss Alps Expedition</h3>
+              <p class="text-sky-500 font-semibold mt-2">Rp 34.750.000</p>
+              <div class="mt-3 text-sm text-slate-500 space-y-1">
+                <p>Durasi: 10 Hari</p>
+                <p>Lokasi: Zurich, Interlaken, Zermatt</p>
+              </div>
+              <button class="trip-btn" data-trip="swiss">Detail Trip</button>
+            </div>
+          </article>
+
+          <article class="trip-card" data-benua="amerika">
+            <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=600&q=80" alt="Peru Trip" class="trip-img" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-slate-900">Andes &amp; Machu Picchu</h3>
+              <p class="text-sky-500 font-semibold mt-2">Rp 29.200.000</p>
+              <div class="mt-3 text-sm text-slate-500 space-y-1">
+                <p>Durasi: 9 Hari</p>
+                <p>Lokasi: Cusco, Sacred Valley, Lima</p>
+              </div>
+              <button class="trip-btn" data-trip="andes">Detail Trip</button>
+            </div>
+          </article>
+
+          <article class="trip-card" data-benua="afrika">
+            <img src="https://images.unsplash.com/photo-1455763916899-e8b50eca9967?auto=format&fit=crop&w=600&q=80" alt="Safari Trip" class="trip-img" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-slate-900">Serengeti Safari Escape</h3>
+              <p class="text-sky-500 font-semibold mt-2">Rp 24.900.000</p>
+              <div class="mt-3 text-sm text-slate-500 space-y-1">
+                <p>Durasi: 7 Hari</p>
+                <p>Lokasi: Tanzania, Ngorongoro</p>
+              </div>
+              <button class="trip-btn" data-trip="safari">Detail Trip</button>
+            </div>
+          </article>
+
+          <article class="trip-card" data-benua="oceania">
+            <img src="https://images.unsplash.com/photo-1431274172761-fca41d930114?auto=format&fit=crop&w=600&q=80" alt="New Zealand" class="trip-img" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-slate-900">New Zealand Road Trip</h3>
+              <p class="text-sky-500 font-semibold mt-2">Rp 32.100.000</p>
+              <div class="mt-3 text-sm text-slate-500 space-y-1">
+                <p>Durasi: 11 Hari</p>
+                <p>Lokasi: Queenstown, Milford Sound</p>
+              </div>
+              <button class="trip-btn" data-trip="nz">Detail Trip</button>
+            </div>
+          </article>
+
+          <article class="trip-card" data-benua="asia">
+            <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80" alt="Bali Trip" class="trip-img" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-slate-900">Island Hopper Bali &amp; Nusa</h3>
+              <p class="text-sky-500 font-semibold mt-2">Rp 7.500.000</p>
+              <div class="mt-3 text-sm text-slate-500 space-y-1">
+                <p>Durasi: 5 Hari</p>
+                <p>Lokasi: Bali, Nusa Penida</p>
+              </div>
+              <button class="trip-btn" data-trip="bali">Detail Trip</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tracking My Trip -->
+    <section id="tracking" class="py-20 bg-slate-50">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid md:grid-cols-2 gap-12">
+          <div>
+            <p class="text-sm font-semibold uppercase text-sky-500">Tracking</p>
+            <h2 class="text-3xl font-semibold text-slate-900 mt-2">Tracking My Trip</h2>
+            <p class="text-slate-500 mt-2">Masukkan kode booking untuk mengetahui status perjalanan, progress, dan lokasi terakhir secara realtime.</p>
+            <form id="tracking-form" class="mt-8 space-y-4">
+              <div>
+                <label for="booking-code" class="block text-sm font-medium text-slate-600">Kode Booking</label>
+                <input id="booking-code" type="text" placeholder="Contoh: TRX1023" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500" required />
+              </div>
+              <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-sky-500 px-6 py-3 text-white font-semibold hover:bg-sky-600 transition">Cek Status</button>
+            </form>
+          </div>
+          <div>
+            <div class="bg-white rounded-2xl shadow-xl p-6" id="tracking-result">
+              <p class="text-sm text-slate-400">Hasil tracking akan muncul di sini.</p>
+              <div class="mt-6 space-y-4 hidden" id="tracking-detail"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Artikel & Cerita Kita -->
+    <section id="artikel" class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto">
+          <p class="text-sm font-semibold uppercase text-sky-500">Artikel &amp; Cerita Kita</p>
+          <h2 class="text-3xl font-semibold text-slate-900 mt-2">Update Perjalanan Terbaru</h2>
+          <p class="text-slate-500 mt-3">Tips, cerita inspiratif, dan highlight destinasi terbaik dari traveler kami.</p>
+        </div>
+        <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <article class="blog-card">
+            <img src="https://images.unsplash.com/photo-1500534313413-33030964a221?auto=format&fit=crop&w=600&q=80" alt="Aurora"
+              class="blog-img" />
+            <div class="p-6">
+              <p class="text-xs uppercase text-slate-400">12 Jan 2024</p>
+              <h3 class="text-lg font-semibold text-slate-900 mt-2">Berburu Aurora di Islandia</h3>
+              <p class="text-sm text-slate-500 mt-3">Tips layering hingga spot terbaik untuk menyaksikan aurora borealis.</p>
+              <button class="blog-btn" data-article="aurora">Baca Selengkapnya</button>
+            </div>
+          </article>
+          <article class="blog-card">
+            <img src="https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?auto=format&fit=crop&w=600&q=80" alt="Desert"
+              class="blog-img" />
+            <div class="p-6">
+              <p class="text-xs uppercase text-slate-400">05 Feb 2024</p>
+              <h3 class="text-lg font-semibold text-slate-900 mt-2">Safari Eksotis di Namibia</h3>
+              <p class="text-sm text-slate-500 mt-3">Kombinasi padang pasir, budaya Himba, dan satwa liar Afrika.</p>
+              <button class="blog-btn" data-article="namibia">Baca Selengkapnya</button>
+            </div>
+          </article>
+          <article class="blog-card">
+            <img src="https://images.unsplash.com/photo-1500534627634-84ae356eb3b3?auto=format&fit=crop&w=600&q=80" alt="Paris"
+              class="blog-img" />
+            <div class="p-6">
+              <p class="text-xs uppercase text-slate-400">20 Mar 2024</p>
+              <h3 class="text-lg font-semibold text-slate-900 mt-2">City Escape ke Paris Modern</h3>
+              <p class="text-sm text-slate-500 mt-3">Rekomendasi rooftop bar dan galeri tersembunyi di kota romantis.</p>
+              <button class="blog-btn" data-article="paris">Baca Selengkapnya</button>
+            </div>
+          </article>
+          <article class="blog-card">
+            <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=600&q=80" alt="Interlaken"
+              class="blog-img" />
+            <div class="p-6">
+              <p class="text-xs uppercase text-slate-400">02 Apr 2024</p>
+              <h3 class="text-lg font-semibold text-slate-900 mt-2">Road Trip Interlaken - Grindelwald</h3>
+              <p class="text-sm text-slate-500 mt-3">Itinerary 4 hari mengeksplor Swiss Alps lengkap dengan biaya.</p>
+              <button class="blog-btn" data-article="interlaken">Baca Selengkapnya</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Artikel Modal -->
+    <div id="article-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center px-4 py-8 z-50">
+      <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <button id="article-modal-close" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition" aria-label="Tutup dialog artikel">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div class="grid md:grid-cols-2">
+          <div class="h-64 md:h-full">
+            <img id="article-modal-image" src="" alt="Detail artikel" class="w-full h-full object-cover" />
+          </div>
+          <div class="p-8 space-y-4">
+            <div>
+              <p id="article-modal-date" class="text-xs uppercase tracking-[0.3em] text-slate-400"></p>
+              <h3 id="article-modal-title" class="text-2xl font-semibold text-slate-900 mt-2"></h3>
+            </div>
+            <p id="article-modal-desc" class="text-sm text-slate-500"></p>
+            <div class="space-y-2 text-sm text-slate-600" id="article-modal-body"></div>
+            <button id="article-modal-cta" class="w-full rounded-2xl bg-slate-900 py-3 text-white font-semibold hover:bg-sky-500 transition">Baca Artikel Lengkap</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Testimoni Traveler -->
+    <section id="testimoni" class="py-20 bg-slate-50">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p class="text-sm font-semibold uppercase text-sky-500">Testimoni Traveler</p>
+        <h2 class="text-3xl font-semibold text-slate-900 mt-2">Cerita Seru dari Komunitas MOSTYCOM</h2>
+        <div class="relative mt-12">
+          <div class="overflow-hidden">
+            <div class="space-y-6" id="testimonial-slider">
+              <div class="testimonial-card">
+                <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Alya" class="testimonial-avatar" />
+                <h3 class="text-xl font-semibold text-slate-900">Alya Rahmania</h3>
+                <p class="text-sky-500">★★★★★</p>
+                <p class="text-slate-500 mt-3">Guide super helpful, itinerary Tokyo - Kyoto padat tapi tetap fleksibel buat explore sendiri.</p>
+              </div>
+              <div class="testimonial-card hidden">
+                <img src="https://randomuser.me/api/portraits/men/52.jpg" alt="Bara" class="testimonial-avatar" />
+                <h3 class="text-xl font-semibold text-slate-900">Bara Putra</h3>
+                <p class="text-sky-500">★★★★★</p>
+                <p class="text-slate-500 mt-3">Tracking statusnya real time, bikin keluarga tenang pas saya summit Kilimanjaro.</p>
+              </div>
+              <div class="testimonial-card hidden">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Citra" class="testimonial-avatar" />
+                <h3 class="text-xl font-semibold text-slate-900">Citra Elsa</h3>
+                <p class="text-sky-500">★★★★☆</p>
+                <p class="text-slate-500 mt-3">Team sangat responsif bantu custom private trip ke Cappadocia &amp; Istanbul.</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-center gap-4 mt-8">
+            <button class="slider-btn" id="prev-testimonial">Prev</button>
+            <button class="slider-btn" id="next-testimonial">Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="py-20 bg-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <p class="text-sm font-semibold uppercase text-sky-500">FAQ</p>
+          <h2 class="text-3xl font-semibold text-slate-900 mt-2">Pertanyaan yang Sering Diajukan</h2>
+        </div>
+        <div class="mt-12 space-y-4" id="faq-list">
+          <div class="faq-item">
+            <button class="faq-question">Apa bedanya Open Trip &amp; Private Trip?</button>
+            <div class="faq-answer">Open Trip dibuka untuk peserta gabungan dengan jadwal tetap, sementara Private Trip dibuat khusus sesuai request itinerary dan tanggal Anda.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">Bagaimana cara pembayaran?</button>
+            <div class="faq-answer">Pembayaran dapat melalui transfer bank, virtual account, atau kartu kredit cicilan 0% hingga 12 bulan.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">Apakah tiket pesawat sudah termasuk?</button>
+            <div class="faq-answer">Sebagian besar paket belum termasuk tiket pesawat internasional, namun tim sales kami siap bantu booking dengan harga khusus.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">Bisakah saya reschedule jadwal?</button>
+            <div class="faq-answer">Reschedule dapat dilakukan maksimal H-30 dengan biaya penyesuaian sesuai kebijakan vendor hotel dan transportasi.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">Apakah MOSTYCOM menyediakan travel insurance?</button>
+            <div class="faq-answer">Ya, setiap peserta mendapatkan perlindungan asuransi perjalanan premium bekerja sama dengan partner global.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tentang Kami -->
+    <section id="tentang" class="py-20 bg-slate-50">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <p class="text-sm font-semibold uppercase text-sky-500">Tentang Kami</p>
+          <h2 class="text-3xl font-semibold text-slate-900 mt-2">MOSTYCOM - Your Global Trip Planner</h2>
+          <p class="text-slate-500 mt-4">Sejak 2012, MOSTYCOM membantu ribuan explorer mengunjungi lebih dari 65 negara. Kami mengkurasi pengalaman autentik, akomodasi premium, dan tim lokal terpercaya.</p>
+          <div class="mt-6">
+            <h3 class="text-xl font-semibold text-slate-900">Visi</h3>
+            <p class="text-slate-500 mt-2">Menjadi travel company digital paling dipercaya di Asia Tenggara.</p>
+          </div>
+          <div class="mt-6">
+            <h3 class="text-xl font-semibold text-slate-900">Misi</h3>
+            <ul class="mt-2 space-y-2 text-slate-500 list-disc list-inside">
+              <li>Menghadirkan itinerary personalisasi berbasis data dan preferensi traveler.</li>
+              <li>Memberdayakan local guide &amp; komunitas destinasi.</li>
+              <li>Menyediakan teknologi tracking yang transparan dan real time.</li>
+            </ul>
+          </div>
+          <div class="mt-8 space-y-2 text-sm text-slate-600">
+            <p><span class="font-semibold text-slate-900">Alamat:</span> Jl. Panglima Polim No. 88, Jakarta</p>
+            <p><span class="font-semibold text-slate-900">Email:</span> hello@travelerx.id</p>
+            <p><span class="font-semibold text-slate-900">Telepon:</span> +62 812-3456-7890</p>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="rounded-3xl overflow-hidden shadow-2xl ring-8 ring-white">
+            <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80" alt="Traveler team" class="w-full h-full object-cover" />
+          </div>
+          <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4 border border-slate-100">
+            <p class="text-sm text-slate-500">Client Trust Score</p>
+            <p class="text-3xl font-semibold text-slate-900">4.9/5</p>
+            <p class="text-xs text-slate-400">Berdasarkan 3.800 ulasan</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Map -->
+    <section id="contact" class="py-20 bg-white">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto">
+          <p class="text-sm font-semibold uppercase text-sky-500">Lokasi Kantor</p>
+          <h2 class="text-3xl font-semibold text-slate-900 mt-2">Hubungi &amp; Kunjungi MOSTYCOM HQ</h2>
+          <p class="text-slate-500 mt-2">Kami berada di Jl. Panglima Polim No. 88, Jakarta Selatan. Silakan datang untuk konsultasi trip atau sesi private planning.</p>
+        </div>
+        <div class="mt-10 grid gap-6 lg:grid-cols-2 items-center">
+          <div class="space-y-4 text-sm text-slate-600">
+            <p class="font-semibold text-slate-900">Jam Operasional</p>
+            <p>Senin - Jumat: 09.00 - 18.00 WIB<br>Sabtu: 10.00 - 15.00 WIB</p>
+            <div>
+              <p class="font-semibold text-slate-900">Kontak</p>
+              <p>Email: hello@travelerx.id</p>
+              <p>Telepon: +62 812-3456-7890</p>
+            </div>
+            <p>Gunakan peta di samping untuk menavigasi lokasi kami atau klik marker untuk mendapatkan koordinat GPS.</p>
+          </div>
+          <div class="bg-slate-100 rounded-3xl overflow-hidden shadow-2xl h-96">
+            <div id="contact-map" class="w-full h-full"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trip Detail Modal -->
+    <div id="trip-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center px-4 py-8 z-50">
+      <div class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <button id="trip-modal-close" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition" aria-label="Tutup dialog">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div class="grid md:grid-cols-2">
+          <div class="h-64 md:h-full">
+            <img id="modal-trip-image" src="" alt="Trip detail" class="w-full h-full object-cover" />
+          </div>
+          <div class="p-8 space-y-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-sky-400">Trip Detail</p>
+              <h3 id="modal-trip-title" class="text-2xl font-semibold text-slate-900 mt-2"></h3>
+              <p id="modal-trip-location" class="text-sm text-slate-500 mt-1"></p>
+            </div>
+            <div class="flex flex-wrap gap-3 text-sm">
+              <span id="modal-trip-price" class="inline-flex items-center rounded-full bg-sky-50 px-4 py-1 text-sky-600 font-semibold"></span>
+              <span id="modal-trip-duration" class="inline-flex items-center rounded-full bg-slate-100 px-4 py-1 text-slate-600 font-semibold"></span>
+            </div>
+            <p id="modal-trip-desc" class="text-sm text-slate-600"></p>
+            <div>
+              <p class="text-sm font-semibold text-slate-900">Highlight Itinerary</p>
+              <ul id="modal-trip-highlights" class="mt-2 space-y-2 text-sm text-slate-600 list-disc list-inside"></ul>
+            </div>
+            <button id="modal-cta" class="w-full rounded-2xl bg-sky-500 py-3 text-white font-semibold hover:bg-sky-600 transition">Booking Trip Ini</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-slate-200 py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8">
+      <div>
+        <p class="text-2xl font-bold text-white">MOSTYCOM</p>
+        <p class="text-sm text-slate-400 mt-3">Digital travel experience planner untuk generasi modern explorer.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div class="space-y-2">
+          <p class="text-white font-semibold">Menu</p>
+          <a href="#home" class="block hover:text-white">Home</a>
+          <a href="#trip" class="block hover:text-white">Trip</a>
+          <a href="#tracking" class="block hover:text-white">Tracking</a>
+          <a href="#artikel" class="block hover:text-white">Artikel</a>
+        </div>
+        <div class="space-y-2">
+          <p class="text-white font-semibold">Lainnya</p>
+          <a href="#testimoni" class="block hover:text-white">Testimoni</a>
+          <a href="#faq" class="block hover:text-white">FAQ</a>
+          <a href="#tentang" class="block hover:text-white">Tentang Kami</a>
+          <a href="#contact" class="block hover:text-white">Contact</a>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <p class="text-white font-semibold">Social Media</p>
+        <div class="flex gap-4">
+          <a href="#" class="social-icon" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5">
+              <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+              <circle cx="12" cy="12" r="3.5"></circle>
+              <circle cx="17.5" cy="6.5" r="1"></circle>
+            </svg>
+          </a>
+          <a href="#" class="social-icon" aria-label="Twitter">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5">
+              <path d="M19 3l-7 9-2-3-6 12"></path>
+              <path d="M12 12l8 8"></path>
+            </svg>
+          </a>
+          <a href="#" class="social-icon" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+              <path d="M22 12s0-3.2-.4-4.7c-.2-.8-.8-1.4-1.6-1.6C18.5 5 12 5 12 5s-6.5 0-8 .7c-.8.2-1.4.8-1.6 1.6C2 8.8 2 12 2 12s0 3.2.4 4.7c.2.8.8 1.4 1.6 1.6 1.5.7 8 .7 8 .7s6.5 0 8-.7c.8-.2 1.4-.8 1.6-1.6.4-1.5.4-4.7.4-4.7z"></path>
+              <path d="M10 9l5 3-5 3V9z" fill="#0f172a"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="mt-10 text-center text-xs text-slate-500">© 2024 MOSTYCOM. All rights reserved.</div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Utility classes for buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.add('px-4', 'py-2', 'rounded-full', 'text-sm', 'font-semibold', 'border', 'border-slate-200', 'text-slate-500', 'hover:text-white', 'hover:bg-sky-500', 'transition');
+    });
+    document.querySelectorAll('.trip-card').forEach(card => {
+      card.classList.add('bg-white', 'rounded-3xl', 'overflow-hidden', 'shadow-lg', 'border', 'border-slate-100');
+    });
+    document.querySelectorAll('.trip-img').forEach(img => {
+      img.classList.add('w-full', 'h-48', 'object-cover');
+    });
+    document.querySelectorAll('.trip-btn').forEach(btn => {
+      btn.classList.add('mt-6', 'inline-flex', 'items-center', 'justify-center', 'w-full', 'rounded-2xl', 'bg-slate-900', 'text-white', 'font-semibold', 'py-2.5', 'hover:bg-sky-500', 'transition');
+    });
+    document.querySelectorAll('.blog-card').forEach(card => {
+      card.classList.add('bg-white', 'rounded-3xl', 'overflow-hidden', 'shadow-lg', 'border', 'border-slate-100');
+    });
+    document.querySelectorAll('.blog-img').forEach(img => {
+      img.classList.add('w-full', 'h-48', 'object-cover');
+    });
+    document.querySelectorAll('.blog-btn').forEach(btn => {
+      btn.classList.add('mt-4', 'text-sm', 'font-semibold', 'text-sky-500', 'hover:text-sky-600', 'transition');
+    });
+    document.querySelectorAll('.slider-btn').forEach(btn => {
+      btn.classList.add('px-5', 'py-2.5', 'rounded-full', 'border', 'border-slate-200', 'text-slate-600', 'hover:bg-sky-500', 'hover:text-white', 'transition');
+    });
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.classList.add('bg-slate-50', 'rounded-2xl', 'border', 'border-slate-100', 'overflow-hidden');
+    });
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.classList.add('w-full', 'text-left', 'px-6', 'py-4', 'font-semibold', 'text-slate-900', 'flex', 'justify-between', 'items-center');
+      btn.innerHTML += '<span class="text-slate-400">+</span>';
+    });
+    document.querySelectorAll('.faq-answer').forEach(ans => {
+      ans.classList.add('px-6', 'pb-4', 'text-sm', 'text-slate-500', 'hidden');
+    });
+    document.querySelectorAll('.social-icon').forEach(icon => {
+      icon.classList.add('w-10', 'h-10', 'rounded-full', 'bg-slate-800', 'flex', 'items-center', 'justify-center', 'hover:bg-sky-500', 'transition');
+    });
+
+    // Sticky sections logic & modal data
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const tripCards = document.querySelectorAll('[data-benua]');
+    const tripButtons = document.querySelectorAll('.trip-btn');
+    const articleButtons = document.querySelectorAll('[data-article]');
+    const tripDetails = {
+      hanami: {
+        title: 'Hanami Japan Adventure',
+        price: 'Rp 18.500.000',
+        duration: '8 Hari',
+        location: 'Tokyo • Kyoto • Osaka',
+        image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80',
+        desc: 'Rasakan euforia festival sakura ditemani host Jepang kami, jelajahi kuil bersejarah hingga hidden cafe favorit locals.',
+        highlights: [
+          'Hanami picnic & kimono photoshoot di Kyoto',
+          'Experience kereta Shinkansen & kuliner street food Osaka',
+          'Private guide menuju Gunung Fuji & Lake Kawaguchi'
+        ]
+      },
+      swiss: {
+        title: 'Swiss Alps Expedition',
+        price: 'Rp 34.750.000',
+        duration: '10 Hari',
+        location: 'Zurich • Interlaken • Zermatt',
+        image: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=900&q=80',
+        desc: 'Eksplorasi Swiss Alps dengan kombinasi hiking ringan, lake cruise yang tenang, dan perjalanan kereta panorama Glacier Express.',
+        highlights: [
+          'Naik cable car menuju Jungfraujoch dengan lunch buffet',
+          'One-day pass Glacier Express kelas panorama',
+          'Workshop cokelat artisan lokal Zurich'
+        ]
+      },
+      andes: {
+        title: 'Andes & Machu Picchu',
+        price: 'Rp 29.200.000',
+        duration: '9 Hari',
+        location: 'Cusco • Sacred Valley • Lima',
+        image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=80',
+        desc: 'Menapaki jejak Inca melalui trekking ringan Inca Trail, cultural immersion bersama komunitas Quechua, hingga kuliner Peru modern.',
+        highlights: [
+          'Sunrise access di Machu Picchu & Huayna Picchu',
+          'Belajar memasak ceviche di Lima',
+          'Eksplor pasar artisanal & weaving class di Sacred Valley'
+        ]
+      },
+      safari: {
+        title: 'Serengeti Safari Escape',
+        price: 'Rp 24.900.000',
+        duration: '7 Hari',
+        location: 'Serengeti • Ngorongoro',
+        image: 'https://images.unsplash.com/photo-1455763916899-e8b50eca9967?auto=format&fit=crop&w=900&q=80',
+        desc: 'Safari eksklusif ditemani ranger profesional untuk menyaksikan big five, menginap di tented camp premium, dan kunjungan budaya Maasai.',
+        highlights: [
+          'Sunrise game drive & bush breakfast',
+          'Hot air balloon flight above Serengeti',
+          'Private visit ke desa Maasai dengan translator lokal'
+        ]
+      },
+      nz: {
+        title: 'New Zealand Road Trip',
+        price: 'Rp 32.100.000',
+        duration: '11 Hari',
+        location: 'Queenstown • Milford Sound • Tekapo',
+        image: 'https://images.unsplash.com/photo-1431274172761-fca41d930114?auto=format&fit=crop&w=900&q=80',
+        desc: 'Road trip menyatu dengan alam liar South Island, lengkap dengan campervan premium, aktivitas adrenaline, dan hunting milky way.',
+        highlights: [
+          'Cruise Milford Sound + kayaking di fiord',
+          'Bungee jump optional di Kawarau Bridge',
+          'Stargazing Tekapo & relaxing di Onsen Hot Pools'
+        ]
+      },
+      bali: {
+        title: 'Island Hopper Bali & Nusa',
+        price: 'Rp 7.500.000',
+        duration: '5 Hari',
+        location: 'Denpasar • Ubud • Nusa Penida',
+        image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80',
+        desc: 'Liburan tropis untuk beach lovers lengkap dengan private fast boat, villa instagramable, serta sesi healing di Ubud.',
+        highlights: [
+          'Sunrise trekking Gunung Batur + floating breakfast',
+          'Trip sehari ke Diamond Beach & Kelingking',
+          'Workshop yoga dan spa organik di Ubud'
+        ]
+      }
+    };
+    const tripModal = document.getElementById('trip-modal');
+    const tripModalClose = document.getElementById('trip-modal-close');
+    const modalTripImage = document.getElementById('modal-trip-image');
+    const modalTripTitle = document.getElementById('modal-trip-title');
+    const modalTripLocation = document.getElementById('modal-trip-location');
+    const modalTripPrice = document.getElementById('modal-trip-price');
+    const modalTripDuration = document.getElementById('modal-trip-duration');
+    const modalTripDesc = document.getElementById('modal-trip-desc');
+    const modalTripHighlights = document.getElementById('modal-trip-highlights');
+    const modalCTA = document.getElementById('modal-cta');
+    const contactSection = document.getElementById('contact');
+    const articleDetails = {
+      aurora: {
+        title: 'Berburu Aurora di Islandia',
+        date: '12 Jan 2024',
+        desc: 'Panduan lengkap menikmati aurora borealis dari Reykjavík hingga Kirkjufell, lengkap dengan tips outfit anti dingin.',
+        body: [
+          'Kami memulai perjalanan malam dari kota Reykjavík dan berkendara 2 jam ke arah barat laut menuju peninsula Snaefellsnes. Dengan aplikasi aurora forecast dan radio komunikasi lokal, tim berhasil menemukan spot dengan tingkat aktivitas KP 5.',
+          'Selain mengejar aurora, itinerary juga mencakup jelajah Golden Circle, blue lagoon spa, dan mencicipi kuliner lokal seperti lamb soup & rye bread ice cream.'
+        ],
+        image: 'https://images.unsplash.com/photo-1500534313413-33030964a221?auto=format&fit=crop&w=900&q=80'
+      },
+      namibia: {
+        title: 'Safari Eksotis di Namibia',
+        date: '05 Feb 2024',
+        desc: 'Eksplorasi gurun Namib dan pengalaman bertemu suku Himba hingga memotret satwa liar di Etosha National Park.',
+        body: [
+          'Rute favorit kami dimulai dari Windhoek menuju Sossusvlei untuk melihat Dune 45 saat sunrise. Tekstur pasir oranye berpadu langit biru membuat foto landscape dramatis.',
+          'Di Etosha, game drive pagi hari memberi peluang melihat gajah, oryx, hingga cheetah. Paket open trip sudah termasuk photoguide dan briefing keselamatan lengkap.'
+        ],
+        image: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?auto=format&fit=crop&w=900&q=80'
+      },
+      paris: {
+        title: 'City Escape ke Paris Modern',
+        date: '20 Mar 2024',
+        desc: 'Highlight 4 hari mengeksplor Paris modern: rooftop view, concept store, dan galeri seni kontemporer.',
+        body: [
+          'Kami mengkombinasikan tur klasik (Louvre, Seine Cruise) dengan pengalaman baru seperti workshop parfum dan sunset picnic di Parc des Buttes-Chaumont.',
+          'Rekomendasi rooftop favorit: Girafe untuk view Eiffel, sedangkan untuk hidden bar coba Le Comptoir Général yang penuh dekor tropis.'
+        ],
+        image: 'https://images.unsplash.com/photo-1500534627634-84ae356eb3b3?auto=format&fit=crop&w=900&q=80'
+      },
+      interlaken: {
+        title: 'Road Trip Interlaken - Grindelwald',
+        date: '02 Apr 2024',
+        desc: 'Itinerary road trip 4 hari menelusuri danau biru Interlaken hingga lembah Grindelwald.',
+        body: [
+          'Day 1 fokus di area Lake Thun & Brienz dengan aktivitas kayaking dan mengunjungi desa Iseltwald. Day 2 menuju Lauterbrunnen untuk hiking ringan ke Staubbach Falls.',
+          'Menutup perjalanan di Grindelwald First Cliff Walk dan mencoba trotti bike. Paket private kami sudah termasuk Swiss Travel Pass & asuransi alpine.'
+        ],
+        image: 'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=900&q=80'
+      }
+    };
+    const articleModal = document.getElementById('article-modal');
+    const articleModalClose = document.getElementById('article-modal-close');
+    const articleModalImage = document.getElementById('article-modal-image');
+    const articleModalDate = document.getElementById('article-modal-date');
+    const articleModalTitle = document.getElementById('article-modal-title');
+    const articleModalDesc = document.getElementById('article-modal-desc');
+    const articleModalBody = document.getElementById('article-modal-body');
+    const articleModalCTA = document.getElementById('article-modal-cta');
+    const lockBodyScroll = () => document.body.classList.add('overflow-hidden');
+    const releaseBodyScroll = () => {
+      if (tripModal.classList.contains('hidden') && articleModal.classList.contains('hidden')) {
+        document.body.classList.remove('overflow-hidden');
+      }
+    };
+
+    const openTripModal = (tripKey) => {
+      const data = tripDetails[tripKey];
+      if (!data) return;
+      modalTripImage.src = data.image;
+      modalTripImage.alt = data.title;
+      modalTripTitle.textContent = data.title;
+      modalTripLocation.textContent = data.location;
+      modalTripPrice.textContent = data.price;
+      modalTripDuration.textContent = data.duration;
+      modalTripDesc.textContent = data.desc;
+      modalTripHighlights.innerHTML = data.highlights.map(item => `<li>${item}</li>`).join('');
+      modalCTA.textContent = `Booking ${data.title}`;
+      tripModal.classList.remove('hidden');
+      lockBodyScroll();
+    };
+
+    const closeTripModal = () => {
+      tripModal.classList.add('hidden');
+      releaseBodyScroll();
+    };
+
+    tripButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        openTripModal(btn.dataset.trip);
+      });
+    });
+
+    tripModalClose.addEventListener('click', closeTripModal);
+    tripModal.addEventListener('click', (event) => {
+      if (event.target === tripModal) {
+        closeTripModal();
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !tripModal.classList.contains('hidden')) {
+        closeTripModal();
+      }
+    });
+    modalCTA.addEventListener('click', () => {
+      closeTripModal();
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    const openArticleModal = (articleKey) => {
+      const data = articleDetails[articleKey];
+      if (!data) return;
+      articleModalImage.src = data.image;
+      articleModalTitle.textContent = data.title;
+      articleModalDate.textContent = data.date;
+      articleModalDesc.textContent = data.desc;
+      articleModalBody.innerHTML = data.body.map(paragraph => `<p>${paragraph}</p>`).join('');
+      articleModal.classList.remove('hidden');
+      lockBodyScroll();
+    };
+
+    const closeArticleModal = () => {
+      articleModal.classList.add('hidden');
+      releaseBodyScroll();
+    };
+
+    articleButtons.forEach(btn => {
+      btn.addEventListener('click', () => openArticleModal(btn.dataset.article));
+    });
+    articleModalClose.addEventListener('click', closeArticleModal);
+    articleModal.addEventListener('click', (event) => {
+      if (event.target === articleModal) closeArticleModal();
+    });
+    articleModalCTA.addEventListener('click', closeArticleModal);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !articleModal.classList.contains('hidden')) {
+        closeArticleModal();
+      }
+    });
+
+    // Leaflet contact map
+    const contactMapElement = document.getElementById('contact-map');
+    if (contactMapElement && window.L) {
+      const officeLatLng = [-6.244200, 106.802300];
+      const map = L.map('contact-map', {
+        zoomControl: false,
+        scrollWheelZoom: false
+      }).setView(officeLatLng, 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+      L.marker(officeLatLng)
+        .addTo(map)
+        .bindPopup('<strong>MOSTYCOM HQ</strong><br>Jl. Panglima Polim No. 88')
+        .openPopup();
+    }
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        filterButtons.forEach(b => b.classList.remove('bg-sky-500', 'text-white'));
+        filterButtons.forEach(b => b.classList.add('bg-white'));
+        btn.classList.add('bg-sky-500', 'text-white');
+        btn.classList.remove('bg-white');
+
+        tripCards.forEach(card => {
+          const benua = card.dataset.benua;
+          if (filter === 'all' || filter === benua) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // Mobile menu toggle
+    const mobileBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Tracking logic
+    const trackingData = {
+      TRX1023: { name: 'Alya Rahmania', trip: 'Hanami Japan Adventure', status: 'Ongoing', progress: 65, location: 'Kyoto Station' },
+      TRX2844: { name: 'Bara Putra', trip: 'Kilimanjaro Summit', status: 'Done', progress: 100, location: 'Jakarta HQ' },
+      TRX3391: { name: 'Citra Elsa', trip: 'Swiss Alps Expedition', status: 'Ongoing', progress: 40, location: 'Interlaken West' }
+    };
+
+    const trackingForm = document.getElementById('tracking-form');
+    const trackingDetail = document.getElementById('tracking-detail');
+    const trackingResult = document.getElementById('tracking-result');
+
+    const renderTracking = (code, info, isDummy = false) => {
+      const statusColor = info.status.toLowerCase() === 'done' ? 'bg-emerald-500' : 'bg-amber-400';
+      trackingDetail.innerHTML = `
+        <div class="space-y-2">
+          <p class="text-sm text-slate-400">Kode Booking</p>
+          <h3 class="text-2xl font-semibold text-slate-900">${code}</h3>
+        </div>
+        <div class="grid grid-cols-2 gap-4 text-sm text-slate-600">
+          <div>
+            <p class="text-slate-400">Nama Customer</p>
+            <p class="font-semibold text-slate-900">${info.name}</p>
+          </div>
+          <div>
+            <p class="text-slate-400">Trip</p>
+            <p class="font-semibold text-slate-900">${info.trip}</p>
+          </div>
+          <div>
+            <p class="text-slate-400">Status</p>
+            <span class="inline-flex items-center text-white text-xs font-semibold px-3 py-1 rounded-full ${statusColor}">${info.status}</span>
+          </div>
+          <div>
+            <p class="text-slate-400">Lokasi Terakhir</p>
+            <p class="font-semibold text-slate-900">${info.location}</p>
+          </div>
+        </div>
+        <div class="mt-4">
+          <p class="text-sm text-slate-400">Progress</p>
+          <div class="w-full bg-slate-100 rounded-full h-3 mt-1">
+            <div class="bg-sky-500 h-3 rounded-full" style="width: ${info.progress}%"></div>
+          </div>
+        </div>
+        ${isDummy ? '<p class="text-xs text-slate-400 mt-4">Tracking dummy — gunakan kode booking resmi untuk status aktual.</p>' : ''}
+      `;
+      trackingDetail.classList.remove('hidden');
+      trackingResult.classList.add('ring-2', 'ring-sky-100');
+    };
+
+    trackingForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const codeInput = document.getElementById('booking-code');
+      const code = codeInput.value.trim().toUpperCase() || 'TRX0000';
+      const info = trackingData[code];
+      trackingDetail.innerHTML = '';
+
+      if (info) {
+        renderTracking(code, info);
+        return;
+      }
+
+      const dummy = {
+        name: 'Traveler Guest',
+        trip: 'Open Trip Explorer',
+        status: 'Ongoing',
+        progress: 45,
+        location: 'MOSTYCOM HQ - Jakarta'
+      };
+      renderTracking(code, dummy, true);
+    });
+
+    // Testimonial slider
+    const testimonials = document.querySelectorAll('#testimonial-slider .testimonial-card');
+    let testimonialIndex = 0;
+    function showTestimonial(index) {
+      testimonials.forEach((card, i) => {
+        card.classList.toggle('hidden', i !== index);
+      });
+    }
+    document.getElementById('prev-testimonial').addEventListener('click', () => {
+      testimonialIndex = (testimonialIndex - 1 + testimonials.length) % testimonials.length;
+      showTestimonial(testimonialIndex);
+    });
+    document.getElementById('next-testimonial').addEventListener('click', () => {
+      testimonialIndex = (testimonialIndex + 1) % testimonials.length;
+      showTestimonial(testimonialIndex);
+    });
+
+    // FAQ accordion
+    document.querySelectorAll('#faq-list .faq-item').forEach(item => {
+      const question = item.querySelector('.faq-question');
+      const answer = item.querySelector('.faq-answer');
+      question.addEventListener('click', () => {
+        answer.classList.toggle('hidden');
+        question.querySelector('span').textContent = answer.classList.contains('hidden') ? '+' : '-';
+      });
+    });
+
+    // Activate default filter (Semua)
+    filterButtons[0].click();
+  </script>
+</body>
+</html>
