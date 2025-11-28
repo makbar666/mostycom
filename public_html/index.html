@@ -283,35 +283,50 @@
 
     <!-- Testimoni Traveler -->
     <section id="testimoni" class="py-20 bg-slate-50">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <p class="text-sm font-semibold uppercase text-sky-500">Testimoni Traveler</p>
         <h2 class="text-3xl font-semibold text-slate-900 mt-2">Cerita Seru dari Komunitas MOSTYCOM</h2>
-        <div class="relative mt-12">
-          <div class="overflow-hidden">
-            <div class="space-y-6" id="testimonial-slider">
-              <div class="testimonial-card">
-                <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Alya" class="testimonial-avatar" />
-                <h3 class="text-xl font-semibold text-slate-900">Alya Rahmania</h3>
-                <p class="text-sky-500">★★★★★</p>
-                <p class="text-slate-500 mt-3">Guide super helpful, itinerary Tokyo - Kyoto padat tapi tetap fleksibel buat explore sendiri.</p>
-              </div>
-              <div class="testimonial-card hidden">
-                <img src="https://randomuser.me/api/portraits/men/52.jpg" alt="Bara" class="testimonial-avatar" />
-                <h3 class="text-xl font-semibold text-slate-900">Bara Putra</h3>
-                <p class="text-sky-500">★★★★★</p>
-                <p class="text-slate-500 mt-3">Tracking statusnya real time, bikin keluarga tenang pas saya summit Kilimanjaro.</p>
-              </div>
-              <div class="testimonial-card hidden">
-                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Citra" class="testimonial-avatar" />
-                <h3 class="text-xl font-semibold text-slate-900">Citra Elsa</h3>
-                <p class="text-sky-500">★★★★☆</p>
-                <p class="text-slate-500 mt-3">Team sangat responsif bantu custom private trip ke Cappadocia &amp; Istanbul.</p>
-              </div>
+        <div class="mt-12 relative">
+          <div class="overflow-hidden rounded-[40px] bg-white/60 shadow-2xl">
+            <div id="testimonial-track" class="flex transition-transform duration-500 ease-out">
+              <article class="testimonial-slide w-full shrink-0 px-6 py-10 md:px-12 md:py-16">
+                <div class="mx-auto max-w-3xl flex flex-col lg:flex-row items-center gap-8 text-left lg:text-left">
+                  <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Alya" class="testimonial-avatar w-28 h-28 rounded-3xl object-cover shadow-lg" />
+                  <div class="text-center lg:text-left">
+                    <h3 class="text-2xl font-semibold text-slate-900">Alya Rahmania</h3>
+                    <p class="text-sky-500 mt-1 text-xl">★★★★★</p>
+                    <p class="text-lg text-slate-500 mt-4">Guide super helpful, itinerary Tokyo - Kyoto padat tapi tetap fleksibel buat explore sendiri.</p>
+                  </div>
+                </div>
+              </article>
+              <article class="testimonial-slide w-full shrink-0 px-6 py-10 md:px-12 md:py-16">
+                <div class="mx-auto max-w-3xl flex flex-col lg:flex-row items-center gap-8">
+                  <img src="https://randomuser.me/api/portraits/men/52.jpg" alt="Bara" class="testimonial-avatar w-28 h-28 rounded-3xl object-cover shadow-lg" />
+                  <div class="text-center lg:text-left">
+                    <h3 class="text-2xl font-semibold text-slate-900">Bara Putra</h3>
+                    <p class="text-sky-500 mt-1 text-xl">★★★★★</p>
+                    <p class="text-lg text-slate-500 mt-4">Tracking statusnya real time, bikin keluarga tenang pas saya summit Kilimanjaro.</p>
+                  </div>
+                </div>
+              </article>
+              <article class="testimonial-slide w-full shrink-0 px-6 py-10 md:px-12 md:py-16">
+                <div class="mx-auto max-w-3xl flex flex-col lg:flex-row items-center gap-8">
+                  <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Citra" class="testimonial-avatar w-28 h-28 rounded-3xl object-cover shadow-lg" />
+                  <div class="text-center lg:text-left">
+                    <h3 class="text-2xl font-semibold text-slate-900">Citra Elsa</h3>
+                    <p class="text-sky-500 mt-1 text-xl">★★★★☆</p>
+                    <p class="text-lg text-slate-500 mt-4">Team sangat responsif bantu custom private trip ke Cappadocia &amp; Istanbul.</p>
+                  </div>
+                </div>
+              </article>
             </div>
           </div>
-          <div class="flex justify-center gap-4 mt-8">
-            <button class="slider-btn" id="prev-testimonial">Prev</button>
-            <button class="slider-btn" id="next-testimonial">Next</button>
+          <div class="flex items-center justify-between mt-6">
+            <div class="flex gap-4">
+              <button class="slider-btn" id="prev-testimonial">Prev</button>
+              <button class="slider-btn" id="next-testimonial">Next</button>
+            </div>
+            <div id="testimonial-dots" class="flex gap-2"></div>
           </div>
         </div>
       </div>
@@ -891,21 +906,60 @@
     });
 
     // Testimonial slider
-    const testimonials = document.querySelectorAll('#testimonial-slider .testimonial-card');
+    const testimonialTrack = document.getElementById('testimonial-track');
+    const testimonialSlides = document.querySelectorAll('#testimonial-track .testimonial-slide');
+    const testimonialDotsContainer = document.getElementById('testimonial-dots');
     let testimonialIndex = 0;
-    function showTestimonial(index) {
-      testimonials.forEach((card, i) => {
-        card.classList.toggle('hidden', i !== index);
+    let testimonialInterval;
+
+    const createDots = () => {
+      testimonialDotsContainer.innerHTML = '';
+      testimonialSlides.forEach((_, idx) => {
+        const dot = document.createElement('button');
+        dot.className = 'w-3 h-3 rounded-full border border-slate-300 transition';
+        dot.dataset.index = idx;
+        dot.addEventListener('click', () => {
+          testimonialIndex = idx;
+          updateTestimonialSlider();
+          restartTestimonialInterval();
+        });
+        testimonialDotsContainer.appendChild(dot);
       });
-    }
+    };
+
+    const updateTestimonialSlider = () => {
+      testimonialTrack.style.transform = `translateX(-${testimonialIndex * 100}%)`;
+      testimonialDotsContainer.querySelectorAll('button').forEach((dot, idx) => {
+        if (idx === testimonialIndex) {
+          dot.classList.add('bg-sky-500', 'border-transparent');
+        } else {
+          dot.classList.remove('bg-sky-500', 'border-transparent');
+        }
+      });
+    };
+
+    const restartTestimonialInterval = () => {
+      clearInterval(testimonialInterval);
+      testimonialInterval = setInterval(() => {
+        testimonialIndex = (testimonialIndex + 1) % testimonialSlides.length;
+        updateTestimonialSlider();
+      }, 6000);
+    };
+
     document.getElementById('prev-testimonial').addEventListener('click', () => {
-      testimonialIndex = (testimonialIndex - 1 + testimonials.length) % testimonials.length;
-      showTestimonial(testimonialIndex);
+      testimonialIndex = (testimonialIndex - 1 + testimonialSlides.length) % testimonialSlides.length;
+      updateTestimonialSlider();
+      restartTestimonialInterval();
     });
     document.getElementById('next-testimonial').addEventListener('click', () => {
-      testimonialIndex = (testimonialIndex + 1) % testimonials.length;
-      showTestimonial(testimonialIndex);
+      testimonialIndex = (testimonialIndex + 1) % testimonialSlides.length;
+      updateTestimonialSlider();
+      restartTestimonialInterval();
     });
+
+    createDots();
+    updateTestimonialSlider();
+    restartTestimonialInterval();
 
     // FAQ accordion
     document.querySelectorAll('#faq-list .faq-item').forEach(item => {
