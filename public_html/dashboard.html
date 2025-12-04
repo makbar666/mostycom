@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard CMS - MOSTYCOM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100">
+  <div class="min-h-screen flex">
+    <aside class="hidden lg:flex w-72 bg-slate-900 text-white flex-col">
+      <div class="p-6 border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl font-bold">M</div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-300">MOSTYCOM</p>
+            <p class="text-lg font-semibold">CMS Manager</p>
+          </div>
+        </div>
+        <p class="mt-4 text-sm text-slate-300">Kelola konten utama mulai dari katalog trip, artikel blog, hingga update
+          perjalanan.</p>
+      </div>
+      <nav class="flex-1 p-6 space-y-2 text-sm font-semibold">
+        <a href="#overview" data-section-link="overview" data-nav="desktop"
+          class="block px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">Overview</a>
+        <a href="#trip-manager" data-section-link="trip-manager" data-nav="desktop"
+          class="block px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">Trip
+          Manager</a>
+        <a href="#customer-trips" data-section-link="customer-trips" data-nav="desktop"
+          class="block px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">Customer
+          Trip</a>
+        <a href="#article-manager" data-section-link="article-manager" data-nav="desktop"
+          class="block px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">Artikel &amp;
+          Stories</a>
+        <a href="#testimonial-manager" data-section-link="testimonial-manager" data-nav="desktop"
+          class="block px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">Testimoni</a>
+        <a href="#faq-manager" data-section-link="faq-manager" data-nav="desktop"
+          class="block px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">FAQ</a>
+        <a href="#user-manager" data-section-link="user-manager" data-nav="desktop"
+          class="block px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">User
+          Manager</a>
+        <a href="#contact-hq" data-section-link="contact-hq" data-nav="desktop"
+          class="block px-4 py-3 rounded-2xl text-slate-300 hover:bg-white/10 hover:text-white transition">Lokasi &amp;
+          Kontak</a>
+      </nav>
+      <div class="p-6 border-t border-white/10 space-y-3">
+        <p class="text-xs text-slate-400">Status Akun</p>
+        <p class="text-sm font-semibold" id="sidebar-user-name">Admin</p>
+        <p class="text-xs text-slate-400" id="sidebar-user-role">Content Manager</p>
+        <button data-action="logout"
+          class="w-full rounded-2xl bg-white/10 py-2 text-sm font-semibold hover:bg-white/20 transition">Keluar</button>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col">
+      <header class="bg-white border-b border-slate-100 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-sm text-slate-500">Dashboard / Kontrol Konten</p>
+          <h1 class="text-2xl font-semibold text-slate-900">Selamat datang kembali, <span id="hero-user-name"
+              class="text-sky-500">Admin</span></h1>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="hidden md:flex flex-col text-right">
+            <span class="text-sm font-semibold text-slate-900" id="header-user-name">Administrator</span>
+            <span class="text-xs text-slate-500" id="header-user-role">Content Manager</span>
+          </div>
+          <button data-action="logout"
+            class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-900 hover:text-white transition">Logout</button>
+        </div>
+      </header>
+
+      <div class="lg:hidden bg-white border-b border-slate-100 px-6 py-4">
+        <div class="flex gap-2 overflow-x-auto">
+          <button type="button" data-section-link="overview" data-nav="mobile"
+            class="shrink-0 px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">Overview</button>
+          <button type="button" data-section-link="trip-manager" data-nav="mobile"
+            class="shrink-0 px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">Trip</button>
+          <button type="button" data-section-link="customer-trips" data-nav="mobile"
+            class="shrink-0 px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">Customer</button>
+          <button type="button" data-section-link="article-manager" data-nav="mobile"
+            class="shrink-0 px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">Artikel</button>
+          <button type="button" data-section-link="testimonial-manager" data-nav="mobile"
+            class="shrink-0 px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">Testimoni</button>
+          <button type="button" data-section-link="faq-manager" data-nav="mobile"
+            class="shrink-0 px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">FAQ</button>
+          <button type="button" data-section-link="user-manager" data-nav="mobile"
+            class="shrink-0 px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">User</button>
+          <button type="button" data-section-link="contact-hq" data-nav="mobile"
+            class="shrink-0 px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">Lokasi</button>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <section id="overview" data-section="overview" class="space-y-6">
+          <div class="grid md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <p class="text-xs uppercase text-slate-400">Trip Aktif</p>
+              <p class="text-3xl font-semibold text-slate-900" id="trip-count">0</p>
+              <p class="text-sm text-slate-500">Trip yang sedang disiapkan atau tayang</p>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <p class="text-xs uppercase text-slate-400">Artikel</p>
+              <p class="text-3xl font-semibold text-slate-900" id="article-count">0</p>
+              <p class="text-sm text-slate-500">Konten artikel yang siap dibagikan</p>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <p class="text-xs uppercase text-slate-400">Draft</p>
+              <p class="text-3xl font-semibold text-slate-900" id="draft-count">0</p>
+              <p class="text-sm text-slate-500">Draft trip &amp; artikel yang butuh review</p>
+            </div>
+          </div>
+          <div
+            class="bg-gradient-to-r from-slate-900 to-sky-700 rounded-3xl p-6 text-white flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-white/70">Quick Update</p>
+              <h2 class="text-2xl font-semibold">Monitoring Aktivitas CMS</h2>
+              <p class="text-sm text-white/80 mt-2">Gunakan menu di sidebar untuk fokus mengelola trip, artikel, atau
+                aktivitas tim secara terpisah.</p>
+            </div>
+            <div class="flex gap-6">
+              <div>
+                <p class="text-xs text-white/70">Trip Publish</p>
+                <p class="text-2xl font-semibold" id="overview-trip-count">0</p>
+              </div>
+              <div>
+                <p class="text-xs text-white/70">Artikel Publish</p>
+                <p class="text-2xl font-semibold" id="overview-article-count">0</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="faq-manager" data-section="faq-manager" class="space-y-6 hidden">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p class="text-xs uppercase text-slate-400">FAQ</p>
+              <h2 class="text-2xl font-semibold text-slate-900">Pertanyaan Populer</h2>
+              <p class="text-sm text-slate-500">Berikan jawaban singkat untuk hal yang sering ditanyakan traveler.</p>
+            </div>
+            <span class="px-4 py-2 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">Helpdesk</span>
+          </div>
+          <div class="grid lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Form FAQ</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Tambah / Edit FAQ</h3>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Deskripsi Tentang Kami</label>
+                  <textarea name="contact-about" rows="3"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    placeholder="Sejak 2012 kami membantu ribuan traveler ..."></textarea>
+                </div>
+                <span class="text-xs text-slate-500">CMS</span>
+              </div>
+              <form id="faq-form" class="mt-6 space-y-4">
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Judul Pertanyaan</label>
+                  <input name="faq-title" type="text" required placeholder="Bagaimana cara booking private trip?"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Jawaban</label>
+                  <textarea name="faq-content" rows="3" required
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    placeholder="Lakukan konsultasi lewat WhatsApp, tim kami akan mengirimkan proposal itinerary."></textarea>
+                </div>
+                <div class="space-y-3">
+                  <button type="submit" id="faq-save-btn"
+                    class="w-full rounded-2xl bg-slate-900 text-white font-semibold py-3 hover:bg-sky-500 transition">Simpan
+                    FAQ</button>
+                  <button type="button" id="faq-cancel-btn"
+                    class="hidden w-full rounded-2xl border border-slate-200 text-slate-600 font-semibold py-3 hover:bg-slate-50 transition">Batalkan
+                    Edit</button>
+                </div>
+              </form>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Daftar FAQ</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Knowledge Base</h3>
+                </div>
+                <span class="text-xs text-slate-500" id="faq-count">0 FAQ</span>
+              </div>
+              <ul id="faq-list" class="mt-6 divide-y divide-slate-100"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="trip-manager" data-section="trip-manager" class="space-y-6 hidden">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p class="text-xs uppercase text-slate-400">Trip Manager</p>
+              <h2 class="text-2xl font-semibold text-slate-900">Kelola Jadwal Trip</h2>
+              <p class="text-sm text-slate-500">Tambahkan trip terbaru lalu cek daftar itinerary yang aktif.</p>
+            </div>
+            <span class="px-4 py-2 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">CMS Suite</span>
+          </div>
+          <div class="grid lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Form Trip</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Tambah Trip Baru</h3>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">CMS</span>
+              </div>
+              <form id="trip-form" class="mt-6 space-y-4">
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Nama Trip</label>
+                  <input name="trip-title" type="text" required placeholder="Contoh: Aurora Express"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Destinasi</label>
+                    <select name="trip-destination"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                      <option value="" disabled selected>Pilih destinasi</option>
+                      <option value="Asia">Asia</option>
+                      <option value="Eropa">Eropa</option>
+                      <option value="Amerika">Amerika</option>
+                      <option value="Afrika">Afrika</option>
+                      <option value="Australia &amp; Oceania">Australia &amp; Oceania</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Jadwal</label>
+                    <input name="trip-schedule" type="date" placeholder="Pilih tanggal"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                  </div>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Gambar Cover</label>
+                  <input name="trip-image" id="trip-image-input" type="file" accept="image/*"
+                    class="mt-2 w-full rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                  <p class="text-xs text-slate-400 mt-2">PNG/JPG maksimal 2MB.</p>
+                  <div class="mt-3">
+                    <img id="trip-image-preview" src="https://dinsos.palembang.go.id/assets/img/no-image.png"
+                      alt="Preview trip" class="w-full h-40 object-cover rounded-2xl border border-slate-100" />
+                  </div>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Status</label>
+                  <select name="trip-status"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    <option value="Publish">Publish</option>
+                    <option value="Draft">Draft</option>
+                  </select>
+                </div>
+                <div class="space-y-4">
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Terms &amp; Conditions</label>
+                    <textarea name="trip-terms" rows="4" placeholder="Contoh: Refund mengikuti kebijakan maskapai"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Terms Visa</label>
+                    <textarea name="trip-visa" rows="4" placeholder="Proses visa, dokumen wajib, dsb."
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Catatan Trip</label>
+                    <textarea name="trip-notes" rows="4" placeholder="Highlight penting atau hal yang perlu dibawa"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
+                  </div>
+                </div>
+                <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
+                  <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p class="text-sm font-semibold text-slate-700">Detail Rute & Slot</p>
+                      <p class="text-xs text-slate-500">Tambah pilihan rute/kota dan atur kapasitas tiap jadwal keberangkatan.</p>
+                    </div>
+                    <button type="button" id="trip-route-add-btn"
+                      class="shrink-0 rounded-2xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition">Tambah
+                      Rute</button>
+                  </div>
+                  <p id="trip-route-empty" class="mt-4 rounded-2xl bg-white px-4 py-3 text-xs text-slate-500">
+                    Belum ada rute. Klik tombol "Tambah Rute" untuk mengisi pilihan destinasi dan slot.
+                  </p>
+                  <div id="trip-routes-container" class="mt-4 space-y-4"></div>
+                  <p class="mt-4 text-[11px] text-slate-500">Data rute wajib diisi agar traveler dapat memilih itinerary beserta slot yang tersedia.</p>
+                </div>
+                <div class="space-y-3">
+                  <button type="submit" id="trip-save-btn"
+                    class="w-full rounded-2xl bg-slate-900 text-white font-semibold py-3 hover:bg-sky-500 transition">Simpan
+                    Trip</button>
+                  <button type="button" id="trip-cancel-btn"
+                    class="hidden w-full rounded-2xl border border-slate-200 text-slate-600 font-semibold py-3 hover:bg-slate-50 transition">Batalkan
+                    Edit</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Trip Terkini</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Daftar Trip</h3>
+                </div>
+                <span class="text-xs text-slate-500">Realtime</span>
+              </div>
+              <ul id="trip-list" class="mt-6 divide-y divide-slate-100"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="customer-trips" data-section="customer-trips" class="space-y-6 hidden">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p class="text-xs uppercase text-slate-400">Customer Trip</p>
+              <h2 class="text-2xl font-semibold text-slate-900">Pantau Booking Pelanggan</h2>
+              <p class="text-sm text-slate-500">Catat setiap request custom trip lalu update status prosesnya secara
+                berkala.</p>
+            </div>
+            <div class="flex items-center gap-4 text-sm">
+              <span class="px-4 py-2 rounded-full bg-slate-100 font-semibold text-slate-600" id="customer-trip-total">0
+                Booking</span>
+              <span class="text-xs text-slate-500">Realtime log</span>
+            </div>
+          </div>
+          <div class="grid lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Form Custom Trip</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Tambah / Update Booking</h3>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-600">Ops Client</span>
+              </div>
+              <form id="customer-trip-form" class="mt-6 space-y-4">
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Nama Pelanggan</label>
+                  <input name="customer-name" type="text" required placeholder="Contoh: Nadine Salim"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Kode Booking</label>
+                    <input name="customer-booking" type="text" required placeholder="MC-2025-001"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Status</label>
+                    <select name="customer-status"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                      <option value="pending">Pending</option>
+                      <option value="booked">Booked</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="ongoing">On Trip</option>
+                      <option value="completed">Completed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                </div>
+                <p class="text-xs text-slate-400">Status dipakai sebagai pengingat hal apa yang menjadi prioritas untuk
+                  tim ops.</p>
+                <div class="space-y-3">
+                  <button type="submit" id="customer-trip-save-btn"
+                    class="w-full rounded-2xl bg-slate-900 text-white font-semibold py-3 hover:bg-slate-800 transition">Simpan
+                    Booking</button>
+                  <button type="button" id="customer-trip-cancel-btn"
+                    class="hidden w-full rounded-2xl border border-slate-200 text-slate-600 font-semibold py-3 hover:bg-slate-50 transition">Batalkan
+                    Edit</button>
+                </div>
+                <p id="customer-trip-form-status"
+                  class="hidden text-xs font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2 text-center">
+                  Booking tersimpan</p>
+              </form>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Daftar Customer Trip</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Log Booking</h3>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs uppercase text-slate-400">Status Legend</p>
+                  <p class="text-xs text-slate-500">pending · booked · confirmed · ongoing · completed · cancelled</p>
+                </div>
+              </div>
+              <form id="customer-trip-search" class="mt-6 grid md:grid-cols-4 gap-4">
+                <div>
+                  <label class="text-xs font-semibold text-slate-500 uppercase">Nama</label>
+                  <input name="customer-search-name" type="text" placeholder="Cari nama"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-slate-500 uppercase">Kode Booking</label>
+                  <input name="customer-search-booking" type="text" placeholder="MC-2025"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div>
+                  <label class="text-xs font-semibold text-slate-500 uppercase">Status</label>
+                  <select name="customer-search-status"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    <option value="">Semua Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="booked">Booked</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="ongoing">On Trip</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="flex items-end gap-2">
+                  <button type="submit"
+                    class="flex-1 rounded-2xl bg-slate-900 text-white text-sm font-semibold py-2.5 hover:bg-slate-800 transition">Cari</button>
+                  <button type="button" id="customer-trip-search-reset"
+                    class="rounded-2xl border border-slate-200 text-slate-600 text-sm font-semibold px-4 py-2.5 hover:bg-slate-50 transition">Reset</button>
+                </div>
+              </form>
+              <div class="mt-6 overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                  <thead class="text-xs uppercase text-slate-400">
+                    <tr>
+                      <th class="py-2 px-3 font-semibold">Nama</th>
+                      <th class="py-2 px-3 font-semibold">Status</th>
+                      <th class="py-2 px-3 font-semibold">Kode Booking</th>
+                      <th class="py-2 px-3 font-semibold text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="customer-trip-table-body" class="divide-y divide-slate-100 text-slate-600">
+                    <tr>
+                      <td colspan="7" class="py-4 px-3 text-center text-slate-400">Belum ada catatan booking</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="article-manager" data-section="article-manager" class="space-y-6 hidden">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p class="text-xs uppercase text-slate-400">Artikel &amp; Stories</p>
+              <h2 class="text-2xl font-semibold text-slate-900">Kelola Editorial</h2>
+              <p class="text-sm text-slate-500">Tuliskan ide artikel baru dan pantau daftar konten yang tayang.</p>
+            </div>
+            <span class="px-4 py-2 rounded-full bg-amber-100 text-xs font-semibold text-amber-600">Editorial</span>
+          </div>
+          <div class="grid lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Form Artikel</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Tambah Artikel</h3>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-600">Publish</span>
+              </div>
+              <form id="article-form" class="mt-6 space-y-4">
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Judul Artikel</label>
+                  <input name="article-title" type="text" required placeholder="Contoh: Hidden Gem di Swiss"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Kategori</label>
+                  <input name="article-category" type="text" placeholder="Tips Travel"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Gambar Cover</label>
+                  <input name="article-image" id="article-image-input" type="file" accept="image/*"
+                    class="mt-2 w-full rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                  <p class="text-xs text-slate-400 mt-2">Rekomendasi 1200x800px untuk hasil terbaik.</p>
+                  <div class="mt-3">
+                    <img id="article-image-preview"
+                      src="https://images.unsplash.com/photo-1500534627634-84ae356eb3b3?auto=format&fit=crop&w=600&q=80"
+                      alt="Preview artikel" class="w-full h-40 object-cover rounded-2xl border border-slate-100" />
+                  </div>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Isi Artikel</label>
+                  <textarea name="article-content" rows="6"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    placeholder="Tulis cerita lengkap, tips, atau itinerary di sini..."></textarea>
+                  <p class="text-xs text-slate-400 mt-1">Editor sederhana berbasis teks — gunakan Enter untuk paragraf
+                    baru.</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Status</label>
+                  <select name="article-status"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    <option value="Publish">Publish</option>
+                    <option value="Review">Review</option>
+                  </select>
+                </div>
+                <div class="space-y-3">
+                  <button type="submit" id="article-save-btn"
+                    class="w-full rounded-2xl bg-slate-900 text-white font-semibold py-3 hover:bg-sky-500 transition">Simpan
+                    Artikel</button>
+                  <button type="button" id="article-cancel-btn"
+                    class="hidden w-full rounded-2xl border border-slate-200 text-slate-600 font-semibold py-3 hover:bg-slate-50 transition">Batalkan
+                    Edit</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Artikel Terbaru</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Daftar Artikel</h3>
+                </div>
+                <span class="text-xs text-slate-500">Realtime</span>
+              </div>
+              <ul id="article-list" class="mt-6 divide-y divide-slate-100"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="testimonial-manager" data-section="testimonial-manager" class="space-y-6 hidden">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p class="text-xs uppercase text-slate-400">Testimoni</p>
+              <h2 class="text-2xl font-semibold text-slate-900">Cerita Traveler</h2>
+              <p class="text-sm text-slate-500">Kelola daftar ulasan yang muncul di halaman publik.</p>
+            </div>
+            <span class="px-4 py-2 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">Social Proof</span>
+          </div>
+          <div class="grid lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Form Testimoni</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Tambah / Edit Ulasan</h3>
+                </div>
+                <span class="text-xs text-slate-500">Rating 1-5</span>
+              </div>
+              <form id="testimonial-form" class="mt-6 space-y-4">
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Nama Traveler</label>
+                  <input name="testimonial-name" type="text" required placeholder="Contoh: Adinda Sasmita"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Isi Testimoni</label>
+                  <textarea name="testimonial-content" rows="3" required
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    placeholder="Tuliskan pengalaman atau highlight layanan..."></textarea>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Rate</label>
+                  <select name="testimonial-rate"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    <option value="5">5 - Excellent</option>
+                    <option value="4">4 - Great</option>
+                    <option value="3">3 - Good</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="1">1 - Poor</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Foto Traveler</label>
+                  <input name="testimonial-image" id="testimonial-image-input" type="file" accept="image/*"
+                    class="mt-2 w-full rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                  <p class="text-xs text-slate-400 mt-1">Foto kecil akan tampil di daftar testimoni.</p>
+                  <div class="mt-3">
+                    <img id="testimonial-image-preview"
+                      src="https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=200&q=80"
+                      alt="Foto testimoni" class="w-20 h-20 rounded-2xl object-cover border border-slate-100" />
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <button type="submit" id="testimonial-save-btn"
+                    class="w-full rounded-2xl bg-slate-900 text-white font-semibold py-3 hover:bg-sky-500 transition">Simpan
+                    Testimoni</button>
+                  <button type="button" id="testimonial-cancel-btn"
+                    class="hidden w-full rounded-2xl border border-slate-200 text-slate-600 font-semibold py-3 hover:bg-slate-50 transition">Batalkan
+                    Edit</button>
+                </div>
+              </form>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Daftar Testimoni</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Voice of Customers</h3>
+                </div>
+                <span class="text-xs text-slate-500" id="testimonial-count">0 Testimoni</span>
+              </div>
+              <ul id="testimonial-list" class="mt-6 divide-y divide-slate-100"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="user-manager" data-section="user-manager" class="space-y-6 hidden">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p class="text-xs uppercase text-slate-400">Manajemen User</p>
+              <h2 class="text-2xl font-semibold text-slate-900">Akses Login CMS</h2>
+              <p class="text-sm text-slate-500">Tambah, edit, atau hapus akun internal yang dapat memakai dashboard ini.
+              </p>
+            </div>
+            <span class="px-4 py-2 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">Security</span>
+          </div>
+          <div class="grid lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Form User</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Tambah / Edit User</h3>
+                </div>
+                <span class="text-xs text-slate-500">Login Data</span>
+              </div>
+              <form id="user-form" class="mt-6 space-y-4">
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Nama Lengkap</label>
+                  <input name="user-name" type="text"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    placeholder="Admin MOSTYCOM" required />
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Email Login</label>
+                  <input name="user-email" type="email"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    placeholder="admin@mostycom.id" required />
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-slate-600">Password</label>
+                  <input name="user-password" type="password"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    placeholder="Minimal 8 karakter" required />
+                </div>
+                <div class="space-y-3">
+                  <button type="submit" id="user-save-btn"
+                    class="w-full rounded-2xl bg-slate-900 text-white font-semibold py-3 hover:bg-sky-500 transition">Simpan
+                    User</button>
+                  <button type="button" id="user-cancel-btn"
+                    class="hidden w-full rounded-2xl border border-slate-200 text-slate-600 font-semibold py-3 hover:bg-slate-50 transition">Batalkan
+                    Edit</button>
+                </div>
+              </form>
+            </div>
+            <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Daftar User</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Akun CMS Aktif</h3>
+                </div>
+                <span class="text-xs text-slate-500" id="user-count">0 User</span>
+              </div>
+              <ul id="user-list" class="mt-6 divide-y divide-slate-100 text-sm text-slate-600"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="contact-hq" data-section="contact-hq" class="space-y-6 hidden">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p class="text-xs uppercase text-slate-400">Lokasi Kantor</p>
+              <h2 class="text-2xl font-semibold text-slate-900">Hubungi &amp; Kunjungi MOSTYCOM HQ</h2>
+              <p class="text-sm text-slate-500">Atur detail jam operasional, kontak, dan koordinat peta seperti di
+                halaman publik.</p>
+            </div>
+            <span class="px-4 py-2 rounded-full bg-slate-100 text-xs font-semibold text-slate-600">Contact Suite</span>
+          </div>
+          <div class="bg-white rounded-3xl p-6 border border-slate-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs uppercase text-slate-400">Form Lokasi</p>
+                  <h3 class="text-xl font-semibold text-slate-900">Atur Informasi Kantor</h3>
+                </div>
+                <span class="text-xs text-slate-500">Leaflet Map</span>
+              </div>
+              <form id="contact-form" class="mt-6 space-y-6">
+                <div class="border border-slate-200 rounded-3xl p-4 space-y-4">
+                  <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Lokasi Kantor</p>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Judul Section</label>
+                    <input name="contact-title" type="text"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      placeholder="Hubungi & Kunjungi MOSTYCOM HQ" />
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Deskripsi Singkat</label>
+                    <textarea name="contact-description" rows="3"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      placeholder="Kami berada di Jl. Panglima Polim No. 88, Jakarta Selatan..."></textarea>
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Jam Operasional</label>
+                    <textarea name="contact-hours" rows="3"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      placeholder="Senin - Jumat: 09.00 - 18.00 WIB&#10;Sabtu: 10.00 - 15.00 WIB"></textarea>
+                  </div>
+                  <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-slate-600">Email</label>
+                      <input name="contact-email" type="email"
+                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        placeholder="hello@travelerx.id" />
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-slate-600">Telepon</label>
+                      <input name="contact-phone" type="text"
+                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        placeholder="+62 812-3456-7890" />
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-slate-600">WhatsApp</label>
+                      <input name="contact-whatsapp" type="text"
+                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        placeholder="+62 811-0000-000" />
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Alamat Lengkap</label>
+                    <input name="contact-address" type="text"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      placeholder="Jl. Panglima Polim No. 88, Jakarta Selatan" />
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-slate-600">Latitude</label>
+                      <input name="contact-lat" type="text"
+                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        placeholder="-6.244822" />
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-slate-600">Longitude</label>
+                      <input name="contact-lng" type="text"
+                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        placeholder="106.798363" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border border-slate-200 rounded-3xl p-4 space-y-4">
+                  <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Tentang Kami</p>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Judul Tentang Kami</label>
+                    <input name="contact-about-title" type="text"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      placeholder="MOSTYCOM - Your Global Trip Planner" />
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Deskripsi Tentang Kami</label>
+                    <textarea name="contact-about" rows="3"
+                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      placeholder="Sejak 2012 kami membantu ribuan traveler ..."></textarea>
+                  </div>
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-slate-600">Visi</label>
+                      <textarea name="contact-vision" rows="2"
+                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        placeholder="Menjadi travel partner paling dipercaya..."></textarea>
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-slate-600">Misi</label>
+                      <textarea name="contact-mission" rows="2"
+                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        placeholder="1. Menghadirkan layanan premium..."></textarea>
+                    </div>
+                  </div>
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-slate-600">Trust Score</label>
+                      <input name="contact-trust-score" type="text"
+                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        placeholder="4.9/5 dari 1.200 traveler" />
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-slate-600">Highlight Ulasan</label>
+                      <textarea name="contact-review" rows="2"
+                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        placeholder="&quot;MOSTYCOM selalu sigap dan detail dalam mengatur trip kami.&quot;"></textarea>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Foto Trust Score</label>
+                    <input name="contact-trust-image" id="contact-trust-image-input" type="file" accept="image/*"
+                      class="mt-2 w-full rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                    <p class="text-xs text-slate-400 mt-1">Gambar kecil untuk badge trust score.</p>
+                    <div class="mt-4">
+                      <img id="contact-trust-image-preview"
+                        src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=200&q=80"
+                        alt="Trust preview" class="w-32 h-32 object-cover rounded-2xl border border-slate-100" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border border-slate-200 rounded-3xl p-4 space-y-4">
+                  <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Header Depan</p>
+                  <div>
+                    <label class="text-sm font-medium text-slate-600">Image Header</label>
+                    <input name="contact-header-image" id="contact-header-image-input" type="file" accept="image/*"
+                      class="mt-2 w-full rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                    <p class="text-xs text-slate-400 mt-1">Unggah gambar panorama untuk background section lokasi.</p>
+                    <div class="mt-4">
+                      <img id="contact-header-image-preview"
+                        src="https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1600&q=80"
+                        alt="Header preview" class="w-full h-40 object-cover rounded-2xl border border-slate-100" />
+                    </div>
+                  </div>
+                </div>
+                <div id="contact-status" class="hidden text-sm px-4 py-3 rounded-2xl border">
+                </div>
+                <button type="submit"
+                  class="w-full rounded-2xl bg-slate-900 text-white font-semibold py-3 hover:bg-sky-500 transition">Simpan
+                  Info Lokasi</button>
+              </form>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    window.LOGIN_API_BASE_URL = window.LOGIN_API_BASE_URL || '/public/api';
+  </script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+
+</html>

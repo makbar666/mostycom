@@ -1,0 +1,2 @@
+[30-Nov-2025 08:55:21 Asia/Jakarta] PHP Warning:  require(/home/mosb4829/public_html/api/../laravel_backend/public/index.php): failed to open stream: No such file or directory in /home/mosb4829/public_html/api/index.php on line 4
+[30-Nov-2025 08:55:21 Asia/Jakarta] PHP Fatal error:  require(): Failed opening required '/home/mosb4829/public_html/api/../laravel_backend/public/index.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home/mosb4829/public_html/api/index.php on line 4
