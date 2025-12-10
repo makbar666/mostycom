@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         'success' => true,
         'data'    => $rows,
         'meta'    => [
-            'allowed_status' => ['ongoing', 'done', 'cancelled'],
+            'allowed_status' => ['pending', 'ongoing', 'done', 'cancelled'],
             'count' => count($rows)
         ]
     ]);
@@ -145,13 +145,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 | POST – Private, wajib token
 |--------------------------------------------------------------------------
 */
-try {
-    Auth::userOrFail();
-} catch (RuntimeException $exception) {
-    Http::json(['success' => false, 'message' => $exception->getMessage()], 401);
-    exit;
-}
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Http::json(['success' => false, 'message' => 'Method not allowed'], 405);
     exit;
@@ -183,8 +176,8 @@ if (!preg_match('/^[A-Z0-9-]{4,}$/', $kode)) {
     exit;
 }
 
-$allowedStatus = ['ongoing', 'done', 'cancelled'];
-$status = in_array($statusInput, $allowedStatus, true) ? $statusInput : 'ongoing';
+$allowedStatus = ['pending', 'ongoing', 'done', 'cancelled'];
+$status = in_array($statusInput, $allowedStatus, true) ? $statusInput : 'pending';
 
 /*
 |--------------------------------------------------------------------------

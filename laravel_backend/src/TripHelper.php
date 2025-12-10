@@ -8,6 +8,16 @@ use RuntimeException;
 
 class TripHelper
 {
+    public const UPLOADS_RELATIVE_DIR = 'uploads/trips/';
+    private const UPLOADS_BASE_DIR = '/home/mosb4829/public_html/public/uploads/trips/';
+
+    private static function ensureUploadsDirectory(): void
+    {
+        if (!is_dir(self::UPLOADS_BASE_DIR)) {
+            mkdir(self::UPLOADS_BASE_DIR, 0755, true);
+        }
+    }
+
     public static function saveImage(?string $base64): ?string
     {
         if (!$base64) {
@@ -38,25 +48,42 @@ class TripHelper
 
         $fileName = 'trip_' . date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
 
-        /*
-        |--------------------------------------------------------------------------
-        | FIX ABSOLUTE PATH (100% sesuai hosting kamu)
-        |--------------------------------------------------------------------------
-        */
-        $baseDir = '/home/mosb4829/public_html/public/uploads/trips/';
+        self::ensureUploadsDirectory();
 
-        // Pastikan folder ada
-        if (!is_dir($baseDir)) {
-            mkdir($baseDir, 0755, true);
-        }
-
-        $fullPath = $baseDir . $fileName;
+        $fullPath = self::UPLOADS_BASE_DIR . $fileName;
 
         // Simpan file
         file_put_contents($fullPath, $binary);
 
         // Path yang disimpan ke DB
-        return 'uploads/trips/' . $fileName;
+        return self::UPLOADS_RELATIVE_DIR . $fileName;
+    }
+
+    public static function deleteImage(?string $path): void
+    {
+        if (!$path) {
+            return;
+        }
+
+        $normalized = trim($path);
+        if ($normalized === '') {
+            return;
+        }
+
+        if (str_starts_with($normalized, self::UPLOADS_RELATIVE_DIR)) {
+            $normalized = substr($normalized, strlen(self::UPLOADS_RELATIVE_DIR));
+        }
+
+        $normalized = ltrim($normalized, '/');
+        if ($normalized === '') {
+            return;
+        }
+
+        self::ensureUploadsDirectory();
+        $fullPath = self::UPLOADS_BASE_DIR . $normalized;
+        if (is_file($fullPath)) {
+            @unlink($fullPath);
+        }
     }
 
     public static function buildImageUrl(?string $path): ?string

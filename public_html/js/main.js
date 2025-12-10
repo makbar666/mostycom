@@ -40,10 +40,14 @@ document.addEventListener('DOMContentLoaded', () => {
     regionFilter: 'all'
   };
   let testimonialSliderController = null;
+  let tripMarqueeController = null;
+  let articleMarqueeController = null;
   let activeTrip = null;
   let activeRouteKey = null;
   let activeScheduleKey = null;
   let pendingBookingInfo = null;
+  let activeGalleryPhotos = [];
+  let activeGalleryIndex = 0;
 
   const heroBackgroundImage = document.getElementById('hero-background-image');
   const aboutTitleNode = document.getElementById('about-title');
@@ -56,6 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const tripEmptyState = document.getElementById('trip-empty-state');
   const articleGrid = document.getElementById('article-grid');
   const articleEmptyState = document.getElementById('article-empty-state');
+  const tripScrollWrapper = document.querySelector('#packages .trip-scroll');
+  const tripScrollPrevBtn = document.getElementById('trip-scroll-prev');
+  const tripScrollNextBtn = document.getElementById('trip-scroll-next');
+  const articleScrollWrapper = document.querySelector('#artikel .article-scroll');
+  const articleScrollPrevBtn = document.getElementById('article-scroll-prev');
+  const articleScrollNextBtn = document.getElementById('article-scroll-next');
   const contactTitle = document.getElementById('contact-title');
   const contactDescription = document.getElementById('contact-description');
   const contactHours = document.getElementById('contact-hours');
@@ -71,6 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const trustReviewText = document.getElementById('trust-review-text');
   const trustImageNode = document.getElementById('trust-image');
   const whatsappFloatingLink = document.getElementById('whatsapp-floating-link');
+  const tripSearchInput = document.getElementById('tripSearchInput');
+  const tripSearchButton = document.getElementById('tripSearchButton');
+  const tripSearchModal = document.getElementById('trip-search-modal');
+  const tripSearchClose = document.getElementById('trip-search-close');
+  const tripSearchTitle = document.getElementById('trip-search-title');
+  const tripSearchResults = document.getElementById('trip-search-results');
+  const tripSearchEmpty = document.getElementById('trip-search-empty');
+  const tripSearchStatus = document.getElementById('trip-search-status');
+  const tripSearchRefresh = document.getElementById('trip-search-refresh');
+  const tripSearchModalInput = document.getElementById('trip-search-modal-input');
+  const tripSearchModalBtn = document.getElementById('trip-search-modal-btn');
 
   const tripModal = document.getElementById('trip-modal');
   const tripModalClose = document.getElementById('trip-modal-close');
@@ -86,6 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalTripVisa = document.getElementById('modal-trip-visa');
   const modalTripNotes = document.getElementById('modal-trip-notes');
   const modalTripRoutes = document.getElementById('modal-trip-routes');
+  const tripGalleryThumbs = document.getElementById('trip-gallery-thumbs');
+  const tripGalleryPrevBtn = document.getElementById('trip-gallery-prev');
+  const tripGalleryNextBtn = document.getElementById('trip-gallery-next');
   const tripDetailView = document.getElementById('trip-detail-view');
   const tripBookingView = document.getElementById('trip-booking-view');
   const tripBookingBackBtn = document.getElementById('trip-booking-back');
@@ -205,6 +229,10 @@ let contactMarker = null;
     });
   };
 
+  const duplicateMarqueeItems = () => {};
+
+  const createMarqueeController = () => null;
+
   const fetchJson = async (url) => {
     const response = await fetch(url, { credentials: 'same-origin' });
     if (!response.ok) {
@@ -243,6 +271,16 @@ let contactMarker = null;
     return cleaned ? Number.parseInt(cleaned, 10) : 0;
   };
 
+  const dedupeByKey = (items, keyFn) => {
+    const seen = new Set();
+    return items.filter((item) => {
+      const key = keyFn(item);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
   const formatCurrency = (value) => {
     if (!value || Number.isNaN(value)) return 'Hubungi Kami';
     return new Intl.NumberFormat('id-ID', {
@@ -258,9 +296,47 @@ let contactMarker = null;
     element.innerHTML = source ? source.replace(/\n/g, '<br>') : '<span class="text-slate-400 text-xs">Informasi akan segera tersedia.</span>';
   };
 
+  const normalizeTripPhotos = (trip) => {
+    const rawPhotos = Array.isArray(trip?.photos) ? trip.photos : [];
+    const normalized = rawPhotos
+      .map((photo, index) => {
+        const photoUrl = photo?.photo_full_url || photo?.photo_url || null;
+        if (!photoUrl) {
+          return null;
+        }
+        return {
+          id: photo.id ? Number(photo.id) : null,
+          photo_url: photo.photo_url || null,
+          photo_full_url: photoUrl,
+          is_primary: Boolean(photo.is_primary),
+          sort_order: Number.isFinite(Number(photo.sort_order)) ? Number(photo.sort_order) : index + 1
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.sort_order - b.sort_order);
+
+    if (!normalized.length && trip?.gambar_url) {
+      normalized.push({
+        id: null,
+        photo_url: trip.gambar || null,
+        photo_full_url: trip.gambar_url,
+        is_primary: true,
+        sort_order: 1
+      });
+    }
+    return normalized;
+  };
+
+  const getTripCoverPhoto = (trip) => {
+    if (!trip) return null;
+    const photos = Array.isArray(trip.photos) ? trip.photos : [];
+    if (!photos.length) return null;
+    return photos.find((photo) => photo.is_primary) || photos[0];
+  };
+
   const normalizeTripRecord = (trip, fallbackIndex = 0) => {
     if (!trip || typeof trip !== 'object') {
-      return { routes: [] };
+      return { routes: [], photos: [] };
     }
     const tripKey = trip.id ?? fallbackIndex;
     const normalizedRoutes = (Array.isArray(trip.routes) ? trip.routes : []).map((route, routeIndex) => {
@@ -275,9 +351,13 @@ let contactMarker = null;
         }))
       };
     });
+    const normalizedPhotos = normalizeTripPhotos(trip);
+    const coverPhoto = normalizedPhotos.find((photo) => photo.is_primary) || normalizedPhotos[0];
     return {
       ...trip,
-      routes: normalizedRoutes
+      gambar_url: coverPhoto?.photo_full_url || trip.gambar_url || null,
+      routes: normalizedRoutes,
+      photos: normalizedPhotos
     };
   };
 
@@ -305,6 +385,129 @@ let contactMarker = null;
       return 'bg-amber-50 text-amber-600 border border-amber-100';
     }
     return 'bg-emerald-50 text-emerald-700 border border-emerald-100';
+  };
+
+  const getTripPhotosForGallery = (trip) => {
+    if (Array.isArray(trip?.photos) && trip.photos.length) {
+      return trip.photos;
+    }
+    if (trip?.gambar_url) {
+      return [{
+        id: null,
+        photo_url: trip.gambar || null,
+        photo_full_url: trip.gambar_url,
+        is_primary: true,
+        sort_order: 1
+      }];
+    }
+    return [];
+  };
+
+  const updateGalleryNavigationState = () => {
+    const disabled = activeGalleryPhotos.length <= 1;
+    [tripGalleryPrevBtn, tripGalleryNextBtn].forEach((button) => {
+      if (!button) return;
+      button.disabled = disabled;
+      button.classList.toggle('opacity-0', disabled);
+      button.classList.toggle('pointer-events-none', disabled);
+    });
+  };
+
+  const renderTripSearchResults = (items, keyword) => {
+    if (!tripSearchResults) return;
+    const data = Array.isArray(items) ? items : [];
+    tripSearchResults.innerHTML = data.length
+      ? data.map(createTripCardMarkup).join('')
+      : '';
+    tripSearchEmpty?.classList.toggle('hidden', data.length > 0);
+    tripSearchResults.classList.toggle('hidden', data.length === 0);
+    tripSearchTitle.textContent = keyword ? `Hasil untuk "${keyword}"` : 'Trip yang kamu cari';
+    tripSearchStatus.textContent = data.length ? `${data.length} trip ditemukan` : 'Coba kata kunci lain.';
+    attachTripCardEvents();
+  };
+
+  const openTripSearchModal = () => {
+    if (!tripSearchModal) return;
+    tripSearchModal.classList.remove('hidden');
+    lockBodyScroll();
+  };
+
+  const closeTripSearchModal = () => {
+    if (!tripSearchModal) return;
+    tripSearchModal.classList.add('hidden');
+    releaseBodyScroll();
+  };
+
+  const handleTripSearch = async () => {
+    const keyword = (tripSearchModalInput?.value || tripSearchInput?.value || '').trim();
+    if (!keyword) {
+      tripSearchStatus.textContent = 'Masukkan kata kunci dulu.';
+      tripSearchEmpty?.classList.add('hidden');
+      tripSearchResults.innerHTML = '';
+      openTripSearchModal();
+      return;
+    }
+    if (tripSearchInput) tripSearchInput.value = keyword;
+    if (tripSearchModalInput) tripSearchModalInput.value = keyword;
+    tripSearchStatus.textContent = 'Mencari trip...';
+    tripSearchEmpty?.classList.add('hidden');
+    tripSearchResults.innerHTML = '';
+    openTripSearchModal();
+    try {
+      const endpointWithQuery = PUBLIC_TRIP_API_ENDPOINTS.map((url) => `${url}${url.includes('?') ? '&' : '?'}keyword=${encodeURIComponent(keyword)}`);
+      const result = await fetchWithFallback(endpointWithQuery);
+      const trips = Array.isArray(result.data) ? result.data : [];
+      const uniqueTrips = dedupeByKey(trips, (item) => item.id || item.nama_trip || item.slug || JSON.stringify(item));
+      renderTripSearchResults(uniqueTrips.map((trip, index) => normalizeTripRecord(trip, index)), keyword);
+      tripSearchRefresh?.classList.remove('hidden');
+    } catch (error) {
+      console.warn('Pencarian trip gagal:', error);
+      tripSearchStatus.textContent = 'Gagal memuat hasil. Coba lagi nanti.';
+      tripSearchEmpty?.classList.remove('hidden');
+    }
+  };
+
+  const renderTripGalleryThumbnails = () => {
+    if (!tripGalleryThumbs) return;
+    if (!activeGalleryPhotos.length) {
+      tripGalleryThumbs.innerHTML = '';
+      tripGalleryThumbs.classList.add('hidden');
+      return;
+    }
+    tripGalleryThumbs.classList.remove('hidden');
+    tripGalleryThumbs.innerHTML = activeGalleryPhotos
+      .map((photo, index) => {
+        const src = photo.photo_full_url || photo.photo_url || TRIP_PLACEHOLDER;
+        const isActive = index === activeGalleryIndex;
+        const borderClass = isActive ? 'border-sky-500 ring-2 ring-sky-200' : 'border-slate-200';
+        return `
+          <button type="button" data-gallery-index="${index}"
+            class="rounded-2xl overflow-hidden border ${borderClass} focus:outline-none focus:ring-2 focus:ring-sky-300">
+            <img src="${src}" alt="Preview foto ${index + 1}" class="w-20 h-16 object-cover" />
+          </button>
+        `;
+      })
+      .join('');
+  };
+
+  const renderTripGallery = () => {
+    if (!modalTripImage) return;
+    if (!activeGalleryPhotos.length) {
+      modalTripImage.src = TRIP_PLACEHOLDER;
+      modalTripImage.alt = 'Foto trip MOSTYCOM';
+      renderTripGalleryThumbnails();
+      updateGalleryNavigationState();
+      return;
+    }
+    if (activeGalleryIndex < 0 || activeGalleryIndex >= activeGalleryPhotos.length) {
+      activeGalleryIndex = 0;
+    }
+    const activePhoto = activeGalleryPhotos[activeGalleryIndex];
+    const src = activePhoto.photo_full_url || activePhoto.photo_url || TRIP_PLACEHOLDER;
+    modalTripImage.src = src;
+    modalTripImage.alt = `Foto ${activeTrip?.nama_trip || 'Trip MOSTYCOM'}`;
+    renderTripGalleryThumbnails();
+    updateGalleryNavigationState();
   };
 
   const detectRegion = (text = '') => {
@@ -342,7 +545,8 @@ let contactMarker = null;
     const region = detectRegion(`${trip.destinasi || ''} ${trip.nama_trip || ''}`);
     const locationText = trip.destinasi || 'Destinasi akan diumumkan';
     const scheduleText = formatTripSchedule(trip.jadwal);
-    const imageSrc = trip.gambar_url || TRIP_PLACEHOLDER;
+    const coverPhoto = getTripCoverPhoto(trip);
+    const imageSrc = coverPhoto?.photo_full_url || coverPhoto?.photo_url || trip.gambar_url || TRIP_PLACEHOLDER;
     return `
       <article class="trip-card" data-region="${region}">
         <img src="${imageSrc}" alt="${trip.nama_trip || 'Trip MOSTYCOM'}" class="trip-img" />
@@ -381,10 +585,17 @@ let contactMarker = null;
     if (!state.trips.length) {
       tripGrid.innerHTML = '';
       tripEmptyState?.classList.remove('hidden');
+      tripMarqueeController?.destroy();
+      tripMarqueeController = null;
+      if (tripScrollWrapper) {
+        tripScrollWrapper.scrollLeft = 0;
+      }
       return;
     }
     tripEmptyState?.classList.add('hidden');
     tripGrid.innerHTML = state.trips.map(createTripCardMarkup).join('');
+    tripMarqueeController?.destroy();
+    tripMarqueeController = null;
     styleTripCards();
     attachTripCardEvents();
     applyTripFilter(state.regionFilter, false);
@@ -395,10 +606,25 @@ let contactMarker = null;
     if (!state.articles.length) {
       articleGrid.innerHTML = '';
       articleEmptyState?.classList.remove('hidden');
+      articleMarqueeController?.destroy();
+      articleMarqueeController = null;
+      if (articleScrollWrapper) {
+        articleScrollWrapper.scrollLeft = 0;
+      }
       return;
     }
     articleEmptyState?.classList.add('hidden');
     articleGrid.innerHTML = state.articles.map(createArticleCardMarkup).join('');
+    duplicateMarqueeItems(articleGrid);
+    articleMarqueeController?.destroy();
+    articleMarqueeController = createMarqueeController({
+      container: articleScrollWrapper,
+      track: articleGrid,
+      prevButton: articleScrollPrevBtn,
+      nextButton: articleScrollNextBtn,
+      step: 0.7,
+      pauseOnHover: true
+    });
     styleArticleCards();
     attachArticleCardEvents();
   };
@@ -544,6 +770,9 @@ let contactMarker = null;
 
   const showBookingInvoice = (invoiceData) => {
     if (!bookingInvoiceOverlay) {
+      pendingBookingInfo = invoiceData;
+      recordCustomerTrip(invoiceData.booking);
+      showBookingRecorded(invoiceData.booking);
       window.open(invoiceData.whatsappUrl, '_blank', 'noopener');
       pendingBookingInfo = null;
       closeTripModal();
@@ -559,6 +788,55 @@ let contactMarker = null;
       bookingInvoiceOverlay.classList.add('hidden');
     }
     pendingBookingInfo = null;
+  };
+
+  const recordCustomerTrip = async (booking = null) => {
+    if (!booking || !booking.code || !booking.name) return;
+    try {
+      await fetch(`${PUBLIC_API_BASE}/customer-trips/index.php`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          nama: booking.name,
+          kode_booking: booking.code,
+          status: booking.status || 'pending'
+        })
+      });
+    } catch (error) {
+      console.warn('Gagal menyimpan customer trip:', error);
+    }
+  };
+
+  const showBookingRecorded = (booking = null) => {
+    if (!booking || !booking.code) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center px-4 py-8 z-[60]';
+    overlay.innerHTML = `
+      <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8 space-y-4 text-center">
+        <button type="button" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 close-booking-recorded" aria-label="Tutup">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div class="space-y-2">
+          <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Booking Tercatat</p>
+          <h3 class="text-2xl font-semibold text-slate-900">Data Anda Telah Masuk</h3>
+          <p class="text-sm text-slate-600">Silakan cek status secara berkala menggunakan kode booking di bawah ini.</p>
+          <div class="mt-3 inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-slate-900 text-white text-lg font-semibold shadow">
+            ${booking.code}
+          </div>
+        </div>
+      </div>
+    `;
+    const close = () => overlay.remove();
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) close();
+    });
+    overlay.querySelector('.close-booking-recorded')?.addEventListener('click', close);
+    document.body.appendChild(overlay);
   };
 
   const updateScheduleOptions = (routeKey) => {
@@ -672,6 +950,11 @@ let contactMarker = null;
     return encodeURIComponent(lines.join('\n'));
   };
 
+  const generateBookingCode = () => {
+    const base = Math.floor(Date.now() / 1000).toString(36).toUpperCase();
+    return `TRX-${base}`;
+  };
+
   const handleBookingSubmit = (event) => {
     event.preventDefault();
     if (!activeTrip) {
@@ -709,6 +992,7 @@ let contactMarker = null;
     const scheduleLabel = schedule ? formatScheduleLabel(schedule) : 'Jadwal menyusul';
     const pricePerPax = parsePriceToNumber(route?.harga);
     const totalPrice = pricePerPax * pax;
+    const bookingCode = generateBookingCode();
     const message = buildBookingMessage({
       tripName: activeTrip.nama_trip || 'Trip MOSTYCOM',
       routeName: route?.nama_rute || 'Rute pilihan',
@@ -716,7 +1000,7 @@ let contactMarker = null;
       pax,
       name,
       phone,
-      note,
+      note: note ? `${note} | Kode Booking: ${bookingCode}` : `Kode Booking: ${bookingCode}`,
       passengers
     });
 
@@ -736,9 +1020,18 @@ let contactMarker = null;
           ? [
             'Detail Peserta:',
             ...passengers.map((passenger, idx) => `${idx + 1}. ${passenger.name}${passenger.passport ? ` - ${passenger.passport}` : ''}`),
-            note ? `Catatan tambahan: ${note}` : null
+            note ? `Catatan tambahan: ${note}` : null,
+            `Kode Booking: ${bookingCode}`
           ].filter(Boolean).join('\n')
-          : (note ? `Catatan tambahan: ${note}` : '')
+          : [
+            note ? `Catatan tambahan: ${note}` : null,
+            `Kode Booking: ${bookingCode}`
+          ].filter(Boolean).join('\n')
+      },
+      booking: {
+        code: bookingCode,
+        name,
+        status: 'pending'
       }
     });
   };
@@ -895,8 +1188,10 @@ let contactMarker = null;
     if (!trip) return;
     activeTrip = normalizeTripRecord(trip);
     const scheduleText = formatTripSchedule(activeTrip.jadwal);
-    modalTripImage.src = activeTrip.gambar_url || TRIP_PLACEHOLDER;
-    modalTripImage.alt = activeTrip.nama_trip || 'Trip MOSTYCOM';
+    activeGalleryPhotos = getTripPhotosForGallery(activeTrip);
+    const desiredIndex = activeGalleryPhotos.findIndex((photo) => photo.is_primary);
+    activeGalleryIndex = desiredIndex >= 0 ? desiredIndex : 0;
+    renderTripGallery();
     modalTripTitle.textContent = activeTrip.nama_trip || 'Trip MOSTYCOM';
     modalTripLocation.textContent = activeTrip.destinasi || 'Destinasi akan diumumkan';
     modalTripPrice.textContent = `Status: ${(activeTrip.status || 'draft').toUpperCase()}`;
@@ -922,6 +1217,9 @@ let contactMarker = null;
     tripModal.classList.add('hidden');
     hideBookingInvoice();
     resetBookingFormState();
+    activeGalleryPhotos = [];
+    activeGalleryIndex = 0;
+    renderTripGallery();
     releaseBodyScroll();
   };
 
@@ -976,6 +1274,61 @@ let contactMarker = null;
     });
   };
 
+  const initTripManualNav = () => {
+    const scrollByStep = (direction = 1) => {
+      if (!tripScrollWrapper) return;
+      const distance = (tripScrollWrapper.clientWidth || 320) * 0.8;
+      tripScrollWrapper.scrollBy({ left: direction * distance, behavior: 'smooth' });
+    };
+    if (tripScrollPrevBtn) {
+      tripScrollPrevBtn.onclick = () => scrollByStep(-1);
+    }
+    if (tripScrollNextBtn) {
+      tripScrollNextBtn.onclick = () => scrollByStep(1);
+    }
+  };
+
+  const initTripSearch = () => {
+    const submitSearch = () => handleTripSearch();
+    tripSearchButton?.addEventListener('click', submitSearch);
+    tripSearchInput?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        submitSearch();
+      }
+    });
+    tripSearchClose?.addEventListener('click', closeTripSearchModal);
+    tripSearchRefresh?.addEventListener('click', submitSearch);
+    tripSearchModal?.addEventListener('click', (event) => {
+      if (event.target === tripSearchModal) {
+        closeTripSearchModal();
+      }
+    });
+    tripSearchModalBtn?.addEventListener('click', submitSearch);
+    tripSearchModalInput?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        submitSearch();
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && tripSearchModal && !tripSearchModal.classList.contains('hidden')) {
+        closeTripSearchModal();
+      }
+    });
+  };
+
+  const initCategoryShortcuts = () => {
+    const tripSection = document.getElementById('packages');
+    document.querySelectorAll('.category-chip[data-filter]').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const targetFilter = chip.dataset.filter || 'all';
+        applyTripFilter(targetFilter);
+        tripSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  };
+
   const initTripModalListeners = () => {
     tripModalClose?.addEventListener('click', closeTripModal);
     tripModal?.addEventListener('click', (event) => {
@@ -993,11 +1346,36 @@ let contactMarker = null;
     tripBookingForm?.addEventListener('submit', handleBookingSubmit);
   };
 
+  const initTripGalleryControls = () => {
+    tripGalleryPrevBtn?.addEventListener('click', () => {
+      if (activeGalleryPhotos.length <= 1) return;
+      activeGalleryIndex = (activeGalleryIndex - 1 + activeGalleryPhotos.length) % activeGalleryPhotos.length;
+      renderTripGallery();
+    });
+    tripGalleryNextBtn?.addEventListener('click', () => {
+      if (activeGalleryPhotos.length <= 1) return;
+      activeGalleryIndex = (activeGalleryIndex + 1) % activeGalleryPhotos.length;
+      renderTripGallery();
+    });
+    tripGalleryThumbs?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-gallery-index]');
+      if (!button) return;
+      const index = Number(button.dataset.galleryIndex);
+      if (Number.isNaN(index) || !activeGalleryPhotos[index]) return;
+      activeGalleryIndex = index;
+      renderTripGallery();
+    });
+  };
+
   const initBookingInvoiceListeners = () => {
     bookingInvoiceConfirm?.addEventListener('click', () => {
       if (!pendingBookingInfo || !pendingBookingInfo.whatsappUrl) {
         hideBookingInvoice();
         return;
+      }
+      if (pendingBookingInfo.booking) {
+        recordCustomerTrip(pendingBookingInfo.booking);
+        showBookingRecorded(pendingBookingInfo.booking);
       }
       window.open(pendingBookingInfo.whatsappUrl, '_blank', 'noopener');
       hideBookingInvoice();
@@ -1281,7 +1659,9 @@ let contactMarker = null;
   const loadTrips = async () => {
     try {
       const result = await fetchWithFallback(PUBLIC_TRIP_API_ENDPOINTS);
-      state.trips = Array.isArray(result.data) ? result.data.map((trip, index) => normalizeTripRecord(trip, index)) : [];
+      const rawTrips = Array.isArray(result.data) ? result.data : [];
+      const uniqueTrips = dedupeByKey(rawTrips, (item) => item.id || item.nama_trip || item.slug || JSON.stringify(item));
+      state.trips = uniqueTrips.map((trip, index) => normalizeTripRecord(trip, index));
       renderTrips();
     } catch (error) {
       console.warn('Gagal memuat trip publik:', error);
@@ -1334,8 +1714,12 @@ let contactMarker = null;
 
   applyStaticClasses();
   initFilterButtons();
+  initCategoryShortcuts();
   applyTripFilter('all');
+  initTripManualNav();
+  initTripSearch();
   initTripModalListeners();
+  initTripGalleryControls();
   initBookingInvoiceListeners();
   tripBookingRouteSelect?.addEventListener('change', (event) => {
     activeRouteKey = event.target.value || null;

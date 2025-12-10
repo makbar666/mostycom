@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -8,435 +8,979 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    /* Page loader */
+    #page-loader {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.25), transparent 35%), radial-gradient(circle at 80% 30%, rgba(14, 46, 87, 0.35), transparent 40%), #0b1435;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    #page-loader.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-logo {
+      width: 160px;
+      height: auto;
+      filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.4));
+      animation: loader-pop 2s ease-in-out infinite;
+    }
+
+    @keyframes loader-pop {
+      0% {
+        transform: translateY(0) scale(1);
+      }
+
+      50% {
+        transform: translateY(-6px) scale(1.04);
+      }
+
+      100% {
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    :root {
+      --primary: #2563eb;
+      --secondary: #f97316;
+      --muted: #eff4ff;
+    }
+
+    body {
+      font-family: 'Poppins', 'Inter', sans-serif;
+      background: linear-gradient(120deg, #fdfcff 0%, #ebf0ff 60%, #fdfcff 100%);
+      color: #0f172a;
+    }
+
+    .hero-yacht {
+      position: relative;
+      min-height: 740px;
+      background-color: #02142c;
+      color: #f8fbff;
+      overflow: hidden;
+    }
+
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* opacity: 0.85; */
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      /* background: linear-gradient(130deg, rgba(2, 13, 34, 0.35), rgba(3, 30, 72, 0.2)); */
+    }
+
+    .hero-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding-top: 1.5rem;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .hero-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: #fefefe;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .hero-brand img {
+      height: 120px;
+      width: auto;
+    }
+
+    .nav-toggle {
+      display: none;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+      border-radius: 999px;
+      padding: 0.5rem 1.2rem;
+      background: transparent;
+    }
+
+    .nav-pill {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 0.45rem 1.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .nav-pill a {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.95rem;
+      transition: color 0.3s ease;
+    }
+
+    .nav-pill a:hover {
+      color: #ffffff;
+    }
+
+    .hero-link {
+      color: #fefefe;
+      padding: 0.6rem 1.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      font-weight: 500;
+    }
+
+    .hero-title {
+      font-size: clamp(2.8rem, 4.8vw, 3.8rem);
+      line-height: 1.35;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .hero-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #0b1435;
+      font-weight: 600;
+      padding: 0.9rem 2.5rem;
+      box-shadow: 0 20px 40px rgba(12, 18, 43, 0.25);
+    }
+
+    .hero-wave {
+      position: absolute;
+      bottom: -120px;
+      left: 0;
+      right: 0;
+      height: 180px;
+      background: #f4f7ff;
+      border-top-left-radius: 55% 60%;
+      border-top-right-radius: 55% 60%;
+      transform: scaleX(1.1);
+    }
+
+    .hero-search {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    .hero-input {
+      flex: 1 1 260px;
+      padding: 0.85rem 1.25rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    .hero-input::placeholder {
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    .hero-search-button {
+      border-radius: 999px;
+      background: #ffffff;
+      color: #0b1435;
+      font-weight: 600;
+      padding: 0.85rem 2rem;
+      box-shadow: 0 15px 30px rgba(12, 18, 43, 0.25);
+    }
+
+    .glass-card {
+      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.08);
+    }
+
+    .category-chip {
+      border-radius: 999px;
+      background: transparent;
+      box-shadow: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      padding: 0;
+      position: relative;
+    }
+
+    .category-chip-wrapper {
+      margin-top: -140px;
+      position: relative;
+      z-index: 10;
+    }
+
+    @media (max-width: 768px) {
+      .category-chip-wrapper {
+        margin-top: -80px;
+      }
+    }
+
+    .category-chip img {
+      width: 160px;
+      height: 260px;
+      border-radius: 999px;
+      object-fit: cover;
+      margin: 0 auto;
+      border: 10px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.14);
+    }
+
+    .category-chip:hover {
+      transform: translateY(-6px) scale(1.05);
+      box-shadow: 0 25px 55px rgba(15, 23, 42, 0.2);
+    }
+
+    .section-underline {
+      width: 64px;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2563eb, #a855f7);
+    }
+
+    .package-card {
+      border-radius: 36px;
+      background: white;
+      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .package-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 40px 70px rgba(37, 99, 235, 0.15);
+    }
+
+    .service-card {
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08);
+    }
+
+    .testimonial-card {
+      border-radius: 32px;
+      background: white;
+      box-shadow: 0 40px 80px rgba(15, 23, 42, 0.09);
+    }
+
+    .trip-scroll {
+      overflow-x: auto;
+      position: relative;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 1rem;
+    }
+
+    .trip-scroll-track {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: nowrap;
+      width: max-content;
+      will-change: transform;
+    }
+
+    @media (max-width: 640px) {
+      #packages {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+      }
+      .trip-scroll-track {
+        flex-direction: column;
+        width: 100% !important;
+        align-items: stretch;
+      }
+      .trip-scroll {
+        overflow-x: hidden;
+      }
+      .trip-card {
+        width: 100%;
+        min-width: auto;
+      }
+      #trip-grid {
+        width: 100% !important;
+      }
+    }
+
+    .article-scroll {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .article-scroll-track {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: nowrap;
+      width: max-content;
+      will-change: transform;
+    }
+    @media (max-width: 640px) {
+      .article-scroll {
+        overflow-x: hidden;
+      }
+      .article-scroll-track {
+        flex-direction: column;
+        width: 100% !important;
+        align-items: stretch;
+      }
+      #article-grid,
+      .blog-card {
+        width: 100% !important;
+      }
+    }
+
+    .trip-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 10, 25, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 50;
+    }
+
+    .trip-modal-overlay.is-open {
+      display: flex;
+    }
+
+    .trip-modal {
+      background: white;
+      border-radius: 28px;
+      width: 100%;
+      max-width: 480px;
+      padding: 2rem;
+      box-shadow: 0 30px 70px rgba(15, 23, 42, 0.2);
+    }
+
+    .trip-modal header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .trip-modal-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .trip-modal-list li {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 0.85rem 1rem;
+      border-radius: 18px;
+      background: #f4f7ff;
+    }
+
+    .trip-modal-close {
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      color: #475569;
+    }
+
+    .trip-modal-footer {
+      margin-top: 1.5rem;
+      text-align: right;
+    }
+
+    .trip-modal-footer a {
+      color: #2563eb;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .nav-pill {
+        display: none;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+        width: 100%;
+        padding: 1.5rem;
+        position: absolute;
+        top: 4.5rem;
+        left: 0;
+        right: 0;
+        border-radius: 1.5rem;
+      }
+
+      .nav-pill.is-open {
+        display: flex;
+      }
+
+      .nav-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+    }
+
+    .anchor-target {
+      display: block;
+      position: relative;
+      top: -120px;
+      height: 0;
+      visibility: hidden;
+    }
+
+    .hero-fallback-image {
+      width: 0;
+      height: 0;
+      opacity: 0;
+      position: absolute;
+    }
+
+    .filter-chip {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 0.4rem 1.2rem;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.85);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    #trip-grid {
+      animation: none;
+      width: max-content;
+    }
+
+    .trip-card {
+      border-radius: 32px;
+      background: white;
+      box-shadow: 0 30px 70px rgba(15, 23, 42, 0.12);
+      min-width: 18rem;
+      overflow: hidden;
+    }
+    @media (max-width: 640px) {
+      .trip-card {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+
+    .trip-img {
+      width: 100%;
+      height: 11rem;
+      object-fit: cover;
+    }
+
+    .trip-btn {
+      border-radius: 999px;
+      background: #0b1435;
+      color: #ffffff;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      width: 100%;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .trip-btn:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+
+    .blog-card {
+      border-radius: 32px;
+      background: white;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+    }
+
+    .blog-img {
+      width: 100%;
+      height: 12rem;
+      object-fit: cover;
+    }
+
+    .blog-btn {
+      font-weight: 600;
+      color: var(--primary);
+      margin-top: 0.75rem;
+    }
+
+    #tracking-result {
+      min-height: 320px;
+    }
+
+  </style>
 </head>
 
-<body class="text-slate-700">
-  <!-- Header / Navbar -->
-  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur shadow">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <div class="text-2xl font-bold text-sky-500">MOSTYCOM</div>
-        <nav class="hidden lg:flex space-x-6 text-sm font-medium text-slate-600">
-          <a href="#home" class="hover:text-sky-500">Home</a>
-          <a href="#trip" class="hover:text-sky-500">Trip</a>
-          <a href="#tracking" class="hover:text-sky-500">Tracking</a>
-          <a href="#artikel" class="hover:text-sky-500">Artikel</a>
-          <a href="#testimoni" class="hover:text-sky-500">Testimoni</a>
-          <a href="#faq" class="hover:text-sky-500">FAQ</a>
-          <a href="#tentang" class="hover:text-sky-500">Tentang Kami</a>
-          <a href="#contact" class="hover:text-sky-500">Contact</a>
-        </nav>
-        <a href="#contact"
-          class="hidden lg:inline-flex items-center rounded-full bg-sky-500 px-5 py-2 text-white text-sm font-semibold shadow hover:bg-sky-600 transition">Booking
-          Now</a>
-        <button class="lg:hidden inline-flex items-center" aria-label="Toggle menu" id="mobile-menu-btn">
-          <svg class="w-8 h-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+<body class="bg-[#f4f7ff]">
+  <div id="page-loader" role="status" aria-label="Memuat halaman">
+    <img src="assets/logo.png" alt="MOSTYCOM" class="loader-logo" />
+  </div>
+  <section id="home" class="hero-yacht">
+    <video class="hero-video" autoplay muted loop playsinline aria-hidden="true">
+      <source src="assets/cloud.mp4" type="video/mp4" />
+    </video>
+    <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+      <header class="hero-nav flex-wrap">
+        <a href="#home" class="hero-brand">
+          <img src="assets/logo.png" alt="Mostycom logo" />
+        </a>
+        <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navMenu">
+          Menu
+          <span aria-hidden="true">&#9776;</span>
         </button>
-      </div>
-      <div id="mobile-menu" class="lg:hidden hidden pb-4">
-        <div class="flex flex-col space-y-2 text-sm font-medium text-slate-600">
-          <a href="#home" class="py-2 border-b border-slate-100">Home</a>
-          <a href="#trip" class="py-2 border-b border-slate-100">Trip</a>
-          <a href="#tracking" class="py-2 border-b border-slate-100">Tracking</a>
-          <a href="#artikel" class="py-2 border-b border-slate-100">Artikel</a>
-          <a href="#testimoni" class="py-2 border-b border-slate-100">Testimoni</a>
-          <a href="#faq" class="py-2 border-b border-slate-100">FAQ</a>
-          <a href="#tentang" class="py-2 border-b border-slate-100">Tentang Kami</a>
-          <a href="#contact" class="py-2 border-b border-slate-100">Contact</a>
-          <a href="login.html" class="py-2">Login</a>
-          <a href="#contact"
-            class="inline-flex items-center justify-center rounded-full bg-sky-500 px-5 py-2 text-white text-sm font-semibold shadow hover:bg-sky-600 transition">Booking
-            Now</a>
-        </div>
+        <nav class="nav-pill" id="navMenu">
+          <a href="#home">BERANDA</a>
+          <a href="#packages">TRIP</a>
+          <a href="#blog">ARTIKEL</a>
+          <a href="#community">TENTANG KAMI</a>
+          <a href="#blog">FAQ</a>
+          <a href="#contact">KONTAK</a>
+        </nav>
+        <a href="#contact" class="hero-link">Hubungi Kami</a>
+      </header>
+      <div class="py-16 max-w-3xl space-y-6">
+        <p class="uppercase tracking-[0.4em] text-xs text-blue-100">Premium Yacht Charter</p>
+        <h1 class="hero-title">Temukan Trip Bareng ke Seluruh Dunia</h1>
+        <p class="text-lg text-blue-100/90">Mostycom menghubungkanmu dengan open trip dan private tour terpercaya, lengkap dengan layanan premium di setiap destinasi.</p>
+        <form class="hero-search" action="#packages">
+          <input type="text" id="tripSearchInput" class="hero-input" placeholder="Cari destinasi atau kota impianmu" aria-label="Cari destinasi" />
+          <button type="button" id="tripSearchButton" class="hero-search-button">Cari Trip</button>
+        </form>
+        <img id="hero-background-image" src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80" alt="Latar Mostycom" class="hero-fallback-image" />
       </div>
     </div>
-  </header>
+    <div class="hero-wave" aria-hidden="true"></div>
+  </section>
 
-  <main class="overflow-hidden">
-    <!-- Hero Section -->
-    <section id="home" class="relative">
-      <div class="relative min-h-[90vh] flex items-center bg-slate-900/40">
-        <div class="absolute inset-0">
-          <img id="hero-background-image"
-            src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80"
-            alt="Traveler hero" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-slate-900/60"></div>
+  <main class=" mx-auto px-6 lg:px-12 pb-24 space-y-24 pt-24 -mt-16">
+    <section id="categories" class="space-y-6 relative z-10">
+      <div class="space-y-3">
+        <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Categories</p>
+        <div class="flex items-center gap-4">
+          <h2 class="text-3xl font-semibold text-slate-900">Pilihan Destinasi Per Benua</h2>
+          <span class="section-underline"></span>
         </div>
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white py-24">
-          <p class="text-sm uppercase tracking-[0.3em] text-sky-300">Traveler Experience</p>
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight mt-4">Explore The World With Us</h1>
-          <p class="mt-6 text-lg sm:text-xl text-slate-100 max-w-2xl">Open Trip &amp; Private Trip ke berbagai benua.
-            Nikmati pengalaman eksklusif dengan itinerary terbaik dan host profesional.</p>
-          <div class="mt-8 flex flex-col sm:flex-row gap-4">
-            <a href="#trip"
-              class="inline-flex items-center justify-center rounded-full bg-sky-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-400 transition">Lihat
-              Jadwal Trip</a>
-            <a href="#tracking"
-              class="inline-flex items-center justify-center rounded-full border border-white/70 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition">Tracking
-              Trip</a>
-          </div>
-        </div>
+        <p class="text-slate-500 max-w-3xl">Cari inspirasi perjalanan mulai dari Asia hingga Antartika, semuanya kami kelompokkan per benua agar mudah disesuaikan dengan bucket list kamu.</p>
+      </div>
+      <div class="category-chip-wrapper max-w-5xl mx-auto grid md:grid-cols-3 lg:grid-cols-6 gap-6 justify-items-center">
+        <article class="category-chip text-center space-y-3 cursor-pointer" data-filter="asia">
+          <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=80" alt="Asia" loading="lazy" referrerpolicy="no-referrer" />
+          <p class="font-semibold">Asia</p>
+        </article>
+        <article class="category-chip text-center space-y-3 cursor-pointer" data-filter="eropa">
+          <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80" alt="Eropa" loading="lazy" referrerpolicy="no-referrer" />
+          <p class="font-semibold">Eropa</p>
+        </article>
+        <article class="category-chip text-center space-y-3 cursor-pointer" data-filter="amerika">
+          <img src="https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=400&q=80" alt="Amerika" loading="lazy" referrerpolicy="no-referrer" />
+          <p class="font-semibold">Amerika</p>
+        </article>
+        <article class="category-chip text-center space-y-3 cursor-pointer" data-filter="afrika">
+          <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80" alt="Afrika" loading="lazy" referrerpolicy="no-referrer" />
+          <p class="font-semibold">Afrika</p>
+        </article>
+        <article class="category-chip text-center space-y-3 cursor-pointer" data-filter="oceania">
+          <img src="https://images.unsplash.com/photo-1624138784614-87fd1b6528f8?q=80&w=1633&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Australia" loading="lazy" referrerpolicy="no-referrer" />
+          <p class="font-semibold">Australia</p>
+        </article>
+        <article class="category-chip text-center space-y-3 cursor-pointer" data-filter="all">
+          <img src="https://images.unsplash.com/photo-1517327876257-83a373f7ad3c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Antartika" loading="lazy" referrerpolicy="no-referrer" />
+          <p class="font-semibold">Antartika</p>
+        </article>
       </div>
     </section>
 
-    <!-- Filter Jadwal Trip -->
-    <section id="trip" class="py-20 bg-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div>
-            <p class="text-sm font-semibold uppercase text-sky-500">Jadwal Trip</p>
-            <h2 class="text-3xl font-semibold text-slate-900 mt-2">Temukan Trip Favorit per Benua</h2>
-            <p class="text-slate-500 mt-2 max-w-2xl">Filter trip kami berdasarkan benua untuk menemukan penawaran
-              terbaik di Asia, Eropa, Afrika, Amerika, dan Oceania.</p>
-          </div>
-          <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            <button class="filter-btn bg-sky-500 text-white" data-filter="all">Semua Benua</button>
-            <button class="filter-btn bg-white" data-filter="asia">Asia</button>
-            <button class="filter-btn bg-white" data-filter="eropa">Eropa</button>
-            <button class="filter-btn bg-white" data-filter="amerika">Amerika</button>
-            <button class="filter-btn bg-white" data-filter="afrika">Afrika</button>
-            <button class="filter-btn bg-white" data-filter="oceania">Australia &amp; Oceania</button>
-          </div>
+    <span id="trip" class="anchor-target" aria-hidden="true"></span>
+    <section id="packages" class="space-y-8 rounded-none -mx-6 lg:-mx-12 px-6 lg:px-12 py-12 bg-gradient-to-b from-[#0e2e57] to-[#091a31] text-white shadow-inner">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p class="text-sm uppercase tracking-[0.3em] text-white/60">Trip Tersedia</p>
+          <h2 class="text-3xl font-semibold text-white">Paket Favorit Traveler</h2>
         </div>
-        <div id="trip-grid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-12"></div>
-        <p id="trip-empty-state" class="hidden mt-8 text-center text-sm text-slate-500">Trip belum tersedia. Silakan cek
-          kembali nanti.</p>
+        <div class="flex gap-3">
+          <button id="trip-scroll-prev" class="w-12 h-12 rounded-full border border-white/40 flex items-center justify-center text-white/70 hover:text-white" aria-label="Trip sebelumnya" type="button">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          <button id="trip-scroll-next" class="w-12 h-12 rounded-full bg-white text-[#2b59ff] shadow-lg shadow-blue-500/40 flex items-center justify-center hover:bg-blue-50" aria-label="Trip selanjutnya" type="button">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+          </button>
+        </div>
       </div>
+      <div class="flex flex-wrap items-center justify-center gap-3 text-xs font-semibold uppercase tracking-[0.2em]">
+        <button class="filter-chip filter-btn" data-filter="all" type="button">Semua Benua</button>
+        <button class="filter-chip filter-btn" data-filter="asia" type="button">Asia</button>
+        <button class="filter-chip filter-btn" data-filter="eropa" type="button">Eropa</button>
+        <button class="filter-chip filter-btn" data-filter="amerika" type="button">Amerika</button>
+        <button class="filter-chip filter-btn" data-filter="afrika" type="button">Afrika</button>
+        <button class="filter-chip filter-btn" data-filter="oceania" type="button">Australia &amp; Oceania</button>
+      </div>
+      <div class="trip-scroll overflow-x-auto pb-6">
+        <div id="trip-grid" class="trip-scroll-track min-w-full"></div>
+      </div>
+      <p id="trip-empty-state" class="hidden text-sm text-white/80 text-center">Trip belum tersedia. Silakan cek kembali nanti.</p>
     </section>
 
-    <!-- Tracking My Trip -->
-    <section id="tracking" class="py-20 bg-slate-50">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid md:grid-cols-2 gap-12">
-          <div>
-            <p class="text-sm font-semibold uppercase text-sky-500">Tracking</p>
-            <h2 class="text-3xl font-semibold text-slate-900 mt-2">Tracking My Trip</h2>
-            <p class="text-slate-500 mt-2">Masukkan kode booking untuk mengetahui status perjalanan, progress, dan
-              lokasi terakhir secara realtime.</p>
-            <form id="tracking-form" class="mt-8 space-y-4">
-              <div>
-                <label for="booking-code" class="block text-sm font-medium text-slate-600">Kode Booking</label>
-                <input id="booking-code" type="text" placeholder="Contoh: TRX1023"
-                  class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  required />
-              </div>
-              <button type="submit"
-                class="inline-flex items-center justify-center rounded-xl bg-sky-500 px-6 py-3 text-white font-semibold hover:bg-sky-600 transition">Cek
-                Status</button>
+    <span id="tracking" class="anchor-target" aria-hidden="true"></span>
+        <section id="community" class="grid lg:grid-cols-2 gap-10 items-center">
+          <div class="glass-card rounded-[36px] p-8 space-y-4">
+            <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Tracking Trip</p>
+            <h2 class="text-3xl font-semibold text-slate-900">Cek status booking secara realtime</h2>
+            <p class="text-slate-500">Masukkan kode booking untuk melihat progres perjalanan, jadwal hingga lokasi terakhir rombonganmu.</p>
+            <form id="tracking-form" class="space-y-4 pt-2">
+              <label class="block text-sm font-semibold text-slate-900" for="booking-code">Kode Booking</label>
+              <input id="booking-code" type="text" placeholder="Contoh: TRX1023" class="w-full rounded-2xl border border-slate-200 px-5 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+              <button type="submit" class="rounded-2xl bg-blue-600 text-white font-semibold px-6 py-3 w-full sm:w-auto">Cek Status</button>
             </form>
           </div>
-          <div>
-            <div class="bg-white rounded-2xl shadow-xl p-6" id="tracking-result">
-              <p class="text-sm text-slate-400">Hasil tracking akan muncul di sini.</p>
+          <div class="rounded-[36px] overflow-hidden shadow-2xl">
+            <div id="tracking-result" class="glass-card rounded-[36px] p-8 h-full">
+              <p class="text-sm text-slate-500">Hasil tracking akan muncul di sini.</p>
               <div class="mt-6 space-y-4 hidden" id="tracking-detail"></div>
             </div>
           </div>
+        </section>
+
+    <span id="blog" class="anchor-target" aria-hidden="true"></span>
+        <section id="artikel" class="space-y-8">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="max-w-4xl space-y-4">
+              <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Artikel &amp; Cerita Kita</p>
+              <h2 class="text-3xl font-semibold text-slate-900">Tips perjalanan dan kisah komunitas Mostycom</h2>
+              <p class="text-slate-500">Team editorial kami berbagi pengalaman lokal, panduan visa, sampai rekomendasi kuliner halal di setiap trip.</p>
+            </div>
+            <div class="flex gap-3">
+              <button id="article-scroll-prev" class="w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800" aria-label="Artikel sebelumnya" type="button">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <button id="article-scroll-next" class="w-12 h-12 rounded-full bg-slate-900 text-white shadow-lg shadow-slate-900/30 flex items-center justify-center hover:bg-slate-700" aria-label="Artikel selanjutnya" type="button">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+              </button>
+            </div>
+          </div>
+          <div class="space-y-4 w-full">
+            <div class="article-scroll">
+              <div id="article-grid" class="article-scroll-track"></div>
+            </div>
+            <p id="article-empty-state" class="hidden text-sm text-slate-500 text-center">Artikel belum tersedia saat ini.</p>
+          </div>
+        </section>
+
+        <section id="testimoni" class="space-y-6">
+          <div class="space-y-3">
+            <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Testimoni Traveler</p>
+            <h2 class="text-3xl font-semibold text-slate-900">Apa kata mereka setelah trip bersama Mostycom?</h2>
+          </div>
+          <div class="rounded-[36px] overflow-hidden bg-white/60 shadow-2xl">
+            <div id="testimonial-track" class="flex transition-transform duration-500 ease-out"></div>
+          </div>
+          <p id="testimonial-empty" class="hidden text-sm text-slate-500 text-center">Testimoni terbaru akan tampil di sini.</p>
+          <div class="flex items-center justify-between">
+            <div class="flex gap-4">
+              <button class="slider-btn" id="prev-testimonial" type="button">Prev</button>
+              <button class="slider-btn" id="next-testimonial" type="button">Next</button>
+            </div>
+            <div id="testimonial-dots" class="flex gap-2"></div>
+          </div>
+        </section>
+
+        <section id="faq" class="space-y-6">
+          <div>
+            <p class="text-sm uppercase tracking-[0.3em] text-slate-400">FAQ</p>
+            <h2 class="text-3xl font-semibold text-slate-900">Pertanyaan yang sering muncul</h2>
+          </div>
+          <div id="faq-list" class="space-y-4"></div>
+          <p id="faq-empty-state" class="hidden text-sm text-slate-500">FAQ belum tersedia.</p>
+        </section>
+
+        <section id="tentang" class="space-y-6">
+          <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Tentang Kami</p>
+          <div class="glass-card rounded-[36px] p-8 space-y-8">
+            <div class="grid lg:grid-cols-2 gap-10 items-center">
+              <div class="space-y-4">
+                <h2 id="about-title" class="text-3xl font-semibold text-slate-900">Mostycom Travel Studio</h2>
+                <p id="about-description" class="text-slate-500">Kami adalah studio travel yang fokus pada pengalaman trip bersama. Sejak 2017 kami mengkurasi ratusan open trip dan membantu komunitas private tour menemukan destinasi baru dengan standar keamanan tinggi.</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Visi</p>
+                    <ul id="vision-text" class="mt-2 space-y-2 text-slate-500 list-disc list-inside">
+                      <li>Menghadirkan itinerary personalisasi berbasis data.</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Misi</p>
+                    <ul id="mission-list" class="mt-2 space-y-2 text-slate-500 list-disc list-inside">
+                      <li>Menyediakan konsultan perjalanan terpercaya.</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="space-y-2 text-sm text-slate-600">
+                  <p><span class="font-semibold text-slate-900">Alamat:</span> <span id="about-address">Jl. Panglima Polim No. 88, Jakarta</span></p>
+                  <p><span class="font-semibold text-slate-900">Email:</span> <span id="about-email">hello@travelerx.id</span></p>
+                  <p><span class="font-semibold text-slate-900">Telepon:</span> <span id="about-phone">+62 812-3456-7890</span></p>
+                  <p><span class="font-semibold text-slate-900">WhatsApp:</span> <span id="about-whatsapp">+62 811-0000-000</span></p>
+                </div>
+              </div>
+              <div class="space-y-4">
+                <div class="rounded-[32px] overflow-hidden shadow-2xl ring-8 ring-white">
+                  <img id="trust-image" src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80" alt="Tim Mostycom" class="w-full h-full object-cover" />
+                </div>
+                <div class="flex items-center gap-4 bg-white rounded-2xl shadow p-4 border border-slate-100">
+                  <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Client Trust Score</p>
+                    <p id="trust-score-value" class="text-3xl font-semibold text-slate-900">4.9/5</p>
+                    <p id="trust-review-text" class="text-sm text-slate-500">Berdasarkan 3.800 ulasan</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" class="glass-card rounded-[36px] p-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div class="space-y-3 w-full lg:w-1/2">
+            <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Lokasi Kantor</p>
+            <h2 id="contact-title" class="text-3xl font-semibold text-slate-900">Temui kami di Mostycom Hub</h2>
+            <p id="contact-description" class="text-slate-500">Jl. Telaga Bahari No. 18, Jakarta Selatan 12340. Senin-Jumat, 09.00-18.00 WIB.</p>
+            <div class="space-y-2 text-sm text-slate-600">
+              <p class="font-semibold text-slate-900">Jam Operasional</p>
+              <p id="contact-hours">Senin - Jumat: 09.00 - 18.00 WIB<br>Sabtu: 10.00 - 15.00 WIB</p>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4 text-sm text-slate-600">
+              <p>Email: <span id="contact-email">hello@travelerx.id</span></p>
+              <p>Telepon: <span id="contact-phone">+62 812-3456-7890</span></p>
+              <p>WhatsApp: <span id="contact-whatsapp">+62 811-0000-000</span></p>
+              <p>Alamat: <span id="contact-address">Gunakan peta untuk menavigasi lokasi kami.</span></p>
+            </div>
+          </div>
+          <div class="w-full lg:w-1/2 rounded-3xl overflow-hidden shadow-2xl border border-blue-100 bg-white h-80">
+            <div id="contact-map" class="w-full h-full"></div>
+          </div>
+        </section>
+      </main>
+
+  <!-- Artikel Modal -->
+  <div id="article-modal"
+    class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center px-4 py-8 z-50">
+    <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <button id="article-modal-close"
+        class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition"
+        aria-label="Tutup dialog artikel">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="grid md:grid-cols-2">
+        <div class="h-64 md:h-full">
+          <img id="article-modal-image" src="" alt="Detail artikel" class="w-full h-full object-cover" />
+        </div>
+        <div class="p-8 space-y-4">
+          <div>
+            <p id="article-modal-date" class="text-xs uppercase tracking-[0.3em] text-slate-400"></p>
+            <h3 id="article-modal-title" class="text-2xl font-semibold text-slate-900 mt-2"></h3>
+          </div>
+          <p id="article-modal-desc" class="text-sm text-slate-500"></p>
+          <div class="space-y-2 text-sm text-slate-600" id="article-modal-body"></div>
+          <button id="article-modal-cta"
+            class="w-full rounded-2xl bg-slate-900 py-3 text-white font-semibold hover:bg-sky-500 transition">Baca
+            Artikel Lengkap</button>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Artikel & Cerita Kita -->
-    <section id="artikel" class="py-20 bg-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto">
-          <p class="text-sm font-semibold uppercase text-sky-500">Artikel &amp; Cerita Kita</p>
-          <h2 class="text-3xl font-semibold text-slate-900 mt-2">Update Perjalanan Terbaru</h2>
-          <p class="text-slate-500 mt-3">Tips, cerita inspiratif, dan highlight destinasi terbaik dari traveler kami.
-          </p>
+  <!-- Trip Search Modal -->
+  <div id="trip-search-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden z-50 flex items-start justify-center px-4 py-8 overflow-y-auto">
+    <div class="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden mt-10 mb-10">
+      <button id="trip-search-close" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition" aria-label="Tutup dialog pencarian">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="p-6 md:p-8 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Hasil Pencarian</p>
+            <h3 id="trip-search-title" class="text-2xl font-semibold text-slate-900 mt-1">Trip yang kamu cari</h3>
+          </div>
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <input id="trip-search-modal-input" type="text" placeholder="Cari lagi..." class="w-full md:w-72 rounded-2xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+            <button id="trip-search-modal-btn" class="rounded-2xl bg-sky-500 text-white px-4 py-2 text-sm font-semibold hover:bg-sky-600 transition">Cari</button>
+            <button id="trip-search-refresh" class="hidden text-sm font-semibold text-sky-600 hover:text-sky-700">Reset</button>
+          </div>
         </div>
-        <div id="article-grid" class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"></div>
-        <p id="article-empty-state" class="hidden mt-8 text-center text-sm text-slate-500">Artikel belum tersedia saat
-          ini.</p>
+        <div id="trip-search-status" class="text-sm text-slate-500"></div>
+        <div id="trip-search-results" class="grid sm:grid-cols-2 gap-4"></div>
+        <p id="trip-search-empty" class="hidden text-sm text-slate-500 text-center py-6">Trip tidak ditemukan. Coba kata kunci lain.</p>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Artikel Modal -->
-    <div id="article-modal"
-      class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center px-4 py-8 z-50">
-      <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <button id="article-modal-close"
-          class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 transition"
-          aria-label="Tutup dialog artikel">
+  <!-- Trip Detail Modal -->
+  <div id="trip-modal" class="fixed inset-0 hidden z-50 bg-white overflow-y-auto">
+    <div class="min-h-screen flex flex-col bg-white">
+      <div class="relative h-72 md:h-96 w-full">
+        <img id="modal-trip-image" src="" alt="Trip detail" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent"></div>
+        <button id="trip-gallery-prev"
+          class="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/70 backdrop-blur border border-white/70 w-10 h-10 flex items-center justify-center text-slate-700 hover:bg-white transition opacity-0 pointer-events-none"
+          aria-label="Foto sebelum">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <button id="trip-gallery-next"
+          class="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/70 backdrop-blur border border-white/70 w-10 h-10 flex items-center justify-center text-slate-700 hover:bg-white transition opacity-0 pointer-events-none"
+          aria-label="Foto sesudah">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" />
+          </svg>
+        </button>
+        <button id="trip-modal-close"
+          class="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/90 border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition"
+          aria-label="Tutup halaman detail">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <div class="grid md:grid-cols-2">
-          <div class="h-64 md:h-full">
-            <img id="article-modal-image" src="" alt="Detail artikel" class="w-full h-full object-cover" />
-          </div>
-          <div class="p-8 space-y-4">
+      </div>
+      <div id="trip-gallery-thumbs"
+        class="hidden bg-white border-b border-slate-100 px-4 py-3 flex gap-3 overflow-x-auto shadow-sm"></div>
+      <div class="flex-1 w-full py-10 bg-white/90">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div id="trip-detail-view" class="space-y-6">
             <div>
-              <p id="article-modal-date" class="text-xs uppercase tracking-[0.3em] text-slate-400"></p>
-              <h3 id="article-modal-title" class="text-2xl font-semibold text-slate-900 mt-2"></h3>
+              <p class="text-xs uppercase tracking-[0.3em] text-sky-400">Trip Detail</p>
+              <h3 id="modal-trip-title" class="text-3xl font-semibold text-slate-900 mt-2"></h3>
+              <p id="modal-trip-location" class="text-sm text-slate-500 mt-1"></p>
             </div>
-            <p id="article-modal-desc" class="text-sm text-slate-500"></p>
-            <div class="space-y-2 text-sm text-slate-600" id="article-modal-body"></div>
-            <button id="article-modal-cta"
-              class="w-full rounded-2xl bg-slate-900 py-3 text-white font-semibold hover:bg-sky-500 transition">Baca
-              Artikel Lengkap</button>
+            <div class="flex flex-wrap gap-3 text-sm">
+              <span id="modal-trip-price"
+                class="inline-flex items-center rounded-full bg-sky-50 px-4 py-1 text-sky-600 font-semibold"></span>
+              <span id="modal-trip-duration"
+                class="inline-flex items-center rounded-full bg-slate-100 px-4 py-1 text-slate-600 font-semibold"></span>
+            </div>
+            <p id="modal-trip-desc" class="text-sm text-slate-600"></p>
+            <div>
+              <p class="text-sm font-semibold text-slate-900">Highlight Itinerary</p>
+              <ul id="modal-trip-highlights" class="mt-2 space-y-2 text-sm text-slate-600 list-disc list-inside"></ul>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <p class="text-sm font-semibold text-slate-900">Terms &amp; Conditions</p>
+                <div id="modal-trip-terms"
+                  class="mt-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 text-sm text-slate-600"></div>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-900">Terms Visa</p>
+                <div id="modal-trip-visa"
+                  class="mt-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 text-sm text-slate-600"></div>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-900">Catatan Trip</p>
+                <div id="modal-trip-notes"
+                  class="mt-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 text-sm text-slate-600"></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-slate-900">Pilihan Rute &amp; Slot</p>
+              <div id="modal-trip-routes"
+                class="mt-3 space-y-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-3 max-h-80 overflow-y-auto text-sm text-slate-600">
+              </div>
+            </div>
+            <div class="space-y-2">
+              <button id="modal-cta"
+                class="w-full rounded-2xl bg-sky-500 py-3 text-white font-semibold hover:bg-sky-600 transition">Lanjutkan
+                Booking</button>
+              <p class="text-xs text-slate-400 text-center">Pilih rute favorit lalu lanjutkan untuk mengisi formulir
+                pemesanan.</p>
+            </div>
+          </div>
+          <div id="trip-booking-view"
+            class="hidden flex flex-col space-y-4 rounded-3xl border border-slate-100 bg-white shadow-xl p-6 max-w-3xl mx-auto">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Booking Trip</p>
+                <h3 class="text-xl font-semibold text-slate-900 mt-1">Form Pemesanan</h3>
+              </div>
+              <button type="button" id="trip-booking-back"
+                class="text-sm font-semibold text-slate-500 hover:text-slate-900 transition">Kembali</button>
+            </div>
+            <form id="trip-booking-form" class="space-y-4">
+              <div>
+                <label class="text-sm font-semibold text-slate-600">Pilih Rute</label>
+                <select id="trip-booking-route" required
+                  class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </select>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-slate-600">Jadwal Keberangkatan</label>
+                <select id="trip-booking-schedule" required
+                  class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                  <option value="" disabled selected>Pilih jadwal</option>
+                </select>
+              </div>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-sm font-semibold text-slate-600">Nama Lengkap</label>
+                  <input id="trip-booking-name" type="text" required placeholder="Nama Anda"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div>
+                  <label class="text-sm font-semibold text-slate-600">No. WhatsApp</label>
+                  <input id="trip-booking-phone" type="tel" required placeholder="Contoh: 62812xxxx"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+              </div>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-sm font-semibold text-slate-600">Jumlah Peserta</label>
+                  <input id="trip-booking-pax" type="number" min="1" value="2" required
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div>
+                  <label class="text-sm font-semibold text-slate-600">Catatan Singkat</label>
+                  <input id="trip-booking-note" type="text" placeholder="Preferensi hotel, makanan, dll"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-slate-600">Detail Tiap Peserta</label>
+                <div id="trip-booking-passengers"
+                  class="mt-3 space-y-3 rounded-2xl border border-dashed border-slate-200 p-3 bg-slate-50/80 text-sm text-slate-600">
+                </div>
+              </div>
+              <button type="submit"
+                class="w-full rounded-2xl bg-emerald-500 py-3 text-white font-semibold hover:bg-emerald-600 transition">Booking
+                via WhatsApp</button>
+              <p id="trip-booking-summary" class="text-xs text-slate-400 text-center"></p>
+            </form>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Testimoni Traveler -->
-    <section id="testimoni" class="py-20 bg-slate-50">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <p class="text-sm font-semibold uppercase text-sky-500">Testimoni Traveler</p>
-        <h2 class="text-3xl font-semibold text-slate-900 mt-2">Cerita Seru dari Komunitas MOSTYCOM</h2>
-        <div class="mt-12 relative">
-          <div class="overflow-hidden rounded-[40px] bg-white/60 shadow-2xl">
-            <div id="testimonial-track" class="flex transition-transform duration-500 ease-out"></div>
-          </div>
-          <p id="testimonial-empty" class="mt-6 text-sm text-slate-500 hidden">Testimoni terbaru akan tampil di sini.
-          </p>
-          <div class="flex items-center justify-between mt-6">
-            <div class="flex gap-4">
-              <button class="slider-btn" id="prev-testimonial">Prev</button>
-              <button class="slider-btn" id="next-testimonial">Next</button>
-            </div>
-            <div id="testimonial-dots" class="flex gap-2"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section id="faq" class="py-20 bg-white">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-          <p class="text-sm font-semibold uppercase text-sky-500">FAQ</p>
-          <h2 class="text-3xl font-semibold text-slate-900 mt-2">Pertanyaan yang Sering Diajukan</h2>
-        </div>
-        <div class="mt-12 space-y-4" id="faq-list"></div>
-        <p id="faq-empty-state" class="text-center text-sm text-slate-500 mt-6 hidden">FAQ belum tersedia.</p>
-      </div>
-    </section>
-
-    <!-- Tentang Kami -->
-    <section id="tentang" class="py-20 bg-slate-50">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <p class="text-sm font-semibold uppercase text-sky-500">Tentang Kami</p>
-          <h2 id="about-title" class="text-3xl font-semibold text-slate-900 mt-2">MOSTYCOM - Your Global Trip Planner
-          </h2>
-          <p id="about-description" class="text-slate-500 mt-4">Sejak 2012, MOSTYCOM membantu ribuan explorer
-            mengunjungi lebih dari 65 negara.
-            Kami mengkurasi pengalaman autentik, akomodasi premium, dan tim lokal terpercaya.</p>
-          <div class="mt-6">
-            <h3 class="text-xl font-semibold text-slate-900">Visi</h3>
-            <ul id="vision-text" class="mt-2 space-y-2 text-slate-500 list-disc list-inside">
-              <li>Menghadirkan itinerary personalisasi berbasis data dan preferensi traveler.</li>
-            </ul>
-            <!--<p id="vision-text" class="text-slate-500 mt-2">Menjadi travel company digital paling dipercaya di Asia-->
-            <!--  Tenggara.</p>-->
-          </div>
-          <div class="mt-6">
-            <h3 class="text-xl font-semibold text-slate-900">Misi</h3>
-            <ul id="mission-list" class="mt-2 space-y-2 text-slate-500 list-disc list-inside">
-              <li>Menghadirkan itinerary personalisasi berbasis data dan preferensi traveler.</li>
-            </ul>
-          </div>
-          <div class="mt-8 space-y-2 text-sm text-slate-600">
-            <p><span class="font-semibold text-slate-900">Alamat:</span> <span id="about-address">Jl. Panglima Polim No.
-                88, Jakarta</span></p>
-            <p><span class="font-semibold text-slate-900">Email:</span> <span id="about-email">hello@travelerx.id</span>
-            </p>
-            <p><span class="font-semibold text-slate-900">Telepon:</span> <span id="about-phone">+62
-                812-3456-7890</span></p>
-            <p><span class="font-semibold text-slate-900">WhatsApp:</span> <span id="about-whatsapp">+62
-                811-0000-000</span></p>
-          </div>
-        </div>
-        <div class="relative">
-          <div class="rounded-3xl overflow-hidden shadow-2xl ring-8 ring-white">
-            <img id="trust-image"
-              src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80"
-              alt="Traveler team" class="w-full h-full object-cover" />
-          </div>
-          <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4 border border-slate-100">
-            <p class="text-sm text-slate-500">Client Trust Score</p>
-            <div class="flex items-center gap-3 mt-2">
-              <!-- <img id="trust-image"
-                src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=200&q=80"
-                alt="Trust badge" class="w-12 h-12 object-cover rounded-xl border border-slate-100" /> -->
-              <div>
-                <p id="trust-score-value" class="text-2xl font-semibold text-slate-900">4.9/5</p>
-                <p id="trust-review-text" class="text-xs text-slate-400">Berdasarkan 3.800 ulasan</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Contact Map -->
-    <section id="contact" class="py-20 bg-white">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto">
-          <p class="text-sm font-semibold uppercase text-sky-500">Lokasi Kantor</p>
-          <h2 id="contact-title" class="text-3xl font-semibold text-slate-900 mt-2">Hubungi &amp; Kunjungi MOSTYCOM HQ
-          </h2>
-          <p id="contact-description" class="text-slate-500 mt-2">Kami berada di Jl. Panglima Polim No. 88, Jakarta
-            Selatan. Silakan datang untuk konsultasi trip atau sesi private planning.</p>
-        </div>
-        <div class="mt-10 grid gap-6 lg:grid-cols-2 items-center">
-          <div class="space-y-4 text-sm text-slate-600">
-            <p class="font-semibold text-slate-900">Jam Operasional</p>
-            <p id="contact-hours">Senin - Jumat: 09.00 - 18.00 WIB<br>Sabtu: 10.00 - 15.00 WIB</p>
-            <div>
-              <p class="font-semibold text-slate-900">Kontak</p>
-              <p>Email: <span id="contact-email">hello@travelerx.id</span></p>
-              <p>Telepon: <span id="contact-phone">+62 812-3456-7890</span></p>
-              <p>WhatsApp: <span id="contact-whatsapp">+62 811-0000-000</span></p>
-            </div>
-            <p id="contact-address">Gunakan peta di samping untuk menavigasi lokasi kami atau klik marker untuk
-              mendapatkan koordinat GPS.</p>
-          </div>
-          <div class="bg-slate-100 rounded-3xl overflow-hidden shadow-2xl h-96">
-            <div id="contact-map" class="w-full h-full"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Trip Detail Full Page -->
-    <div id="trip-modal" class="fixed inset-0 hidden z-50 bg-white overflow-y-auto">
-      <div class="min-h-screen flex flex-col bg-white">
-        <div class="relative h-72 md:h-96 w-full">
-          <img id="modal-trip-image" src="" alt="Trip detail" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent"></div>
-          <button id="trip-modal-close"
-            class="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/90 border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition"
-            aria-label="Tutup halaman detail">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div class="flex-1 w-full py-10 bg-white/90">
-          <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-            <div id="trip-detail-view" class="space-y-6">
-              <div>
-                <p class="text-xs uppercase tracking-[0.3em] text-sky-400">Trip Detail</p>
-                <h3 id="modal-trip-title" class="text-3xl font-semibold text-slate-900 mt-2"></h3>
-                <p id="modal-trip-location" class="text-sm text-slate-500 mt-1"></p>
-              </div>
-              <div class="flex flex-wrap gap-3 text-sm">
-                <span id="modal-trip-price"
-                  class="inline-flex items-center rounded-full bg-sky-50 px-4 py-1 text-sky-600 font-semibold"></span>
-                <span id="modal-trip-duration"
-                  class="inline-flex items-center rounded-full bg-slate-100 px-4 py-1 text-slate-600 font-semibold"></span>
-              </div>
-              <p id="modal-trip-desc" class="text-sm text-slate-600"></p>
-              <div>
-                <p class="text-sm font-semibold text-slate-900">Highlight Itinerary</p>
-                <ul id="modal-trip-highlights" class="mt-2 space-y-2 text-sm text-slate-600 list-disc list-inside"></ul>
-              </div>
-              <div class="space-y-4">
-                <div>
-                  <p class="text-sm font-semibold text-slate-900">Terms &amp; Conditions</p>
-                  <div id="modal-trip-terms"
-                    class="mt-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 text-sm text-slate-600"></div>
-                </div>
-                <div>
-                  <p class="text-sm font-semibold text-slate-900">Terms Visa</p>
-                  <div id="modal-trip-visa"
-                    class="mt-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 text-sm text-slate-600"></div>
-                </div>
-                <div>
-                  <p class="text-sm font-semibold text-slate-900">Catatan Trip</p>
-                  <div id="modal-trip-notes"
-                    class="mt-2 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 text-sm text-slate-600"></div>
-                </div>
-              </div>
-              <div>
-                <p class="text-sm font-semibold text-slate-900">Pilihan Rute &amp; Slot</p>
-                <div id="modal-trip-routes"
-                  class="mt-3 space-y-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-3 max-h-80 overflow-y-auto text-sm text-slate-600">
-                </div>
-              </div>
-              <div class="space-y-2">
-                <button id="modal-cta"
-                  class="w-full rounded-2xl bg-sky-500 py-3 text-white font-semibold hover:bg-sky-600 transition">Lanjutkan
-                  Booking</button>
-                <p class="text-xs text-slate-400 text-center">Pilih rute favorit lalu lanjutkan untuk mengisi formulir
-                  pemesanan.</p>
-              </div>
-            </div>
-            <div id="trip-booking-view"
-              class="hidden flex flex-col space-y-4 rounded-3xl border border-slate-100 bg-white shadow-xl p-6 max-w-3xl mx-auto">
-              <div class="flex items-center justify-between gap-4">
-                <div>
-                  <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Booking Trip</p>
-                  <h3 class="text-xl font-semibold text-slate-900 mt-1">Form Pemesanan</h3>
-                </div>
-                <button type="button" id="trip-booking-back"
-                  class="text-sm font-semibold text-slate-500 hover:text-slate-900 transition">Kembali</button>
-              </div>
-              <form id="trip-booking-form" class="space-y-4">
-                <div>
-                  <label class="text-sm font-semibold text-slate-600">Pilih Rute</label>
-                  <select id="trip-booking-route" required
-                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-                  </select>
-                </div>
-                <div>
-                  <label class="text-sm font-semibold text-slate-600">Jadwal Keberangkatan</label>
-                  <select id="trip-booking-schedule" required
-                    class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-                    <option value="" disabled selected>Pilih jadwal</option>
-                  </select>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="text-sm font-semibold text-slate-600">Nama Lengkap</label>
-                    <input id="trip-booking-name" type="text" required placeholder="Nama Anda"
-                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
-                  </div>
-                  <div>
-                    <label class="text-sm font-semibold text-slate-600">No. WhatsApp</label>
-                    <input id="trip-booking-phone" type="tel" required placeholder="Contoh: 62812xxxx"
-                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
-                  </div>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="text-sm font-semibold text-slate-600">Jumlah Peserta</label>
-                    <input id="trip-booking-pax" type="number" min="1" value="2" required
-                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
-                  </div>
-                  <div>
-                    <label class="text-sm font-semibold text-slate-600">Catatan Singkat</label>
-                    <input id="trip-booking-note" type="text" placeholder="Preferensi hotel, makanan, dll"
-                      class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
-                  </div>
-                </div>
-                <div>
-                  <label class="text-sm font-semibold text-slate-600">Detail Tiap Peserta</label>
-                  <div id="trip-booking-passengers"
-                    class="mt-3 space-y-3 rounded-2xl border border-dashed border-slate-200 p-3 bg-slate-50/80 text-sm text-slate-600">
-                  </div>
-                </div>
-                <button type="submit"
-                  class="w-full rounded-2xl bg-emerald-500 py-3 text-white font-semibold hover:bg-emerald-600 transition">Booking
-                  via WhatsApp</button>
-                <p id="trip-booking-summary" class="text-xs text-slate-400 text-center"></p>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
+  </div>
 
   <!-- Booking Invoice Overlay -->
   <div id="trip-booking-invoice"
@@ -485,7 +1029,7 @@
   </div>
 
   <!-- Floating WhatsApp Button -->
-  <a id="whatsapp-floating-link" href="https://wa.me/6281234567890?text=Halo%20MOSTYCOM%20saya%20ingin%20tanya%20trip"
+  <!-- <a id="whatsapp-floating-link" href="https://wa.me/6281234567890?text=Halo%20MOSTYCOM%20saya%20ingin%20tanya%20trip"
     target="_blank" rel="noopener"
     class="fixed bottom-6 right-6 md:bottom-8 md:right-8 w-16 h-16 rounded-full bg-[#25D366] shadow-xl shadow-[#25D366]/50 flex items-center justify-center text-white hover:scale-105 transition z-40">
     <div class="relative w-10 h-10">
@@ -497,64 +1041,95 @@
       <span
         class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-xs font-semibold flex items-center justify-center">1</span>
     </div>
-  </a>
+  </a> -->
 
-  <!-- Footer -->
-  <footer class="bg-slate-900 text-slate-200 py-12">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8">
-      <div>
-        <p class="text-2xl font-bold text-white">MOSTYCOM</p>
-        <p class="text-sm text-slate-400 mt-3">Digital travel experience planner untuk generasi modern explorer.</p>
+  <footer class="bg-gradient-to-r from-[#0e2e57] via-[#102a4a] to-[#091a31] text-slate-200">
+    <div class="max-w-6xl mx-auto px-6 lg:px-10 py-12 space-y-10">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="flex items-center gap-3">
+          <img src="assets/logo.png" alt="MOSTYCOM" class="w-16 h-16 object-contain">
+          <div>
+            <p class="text-2xl font-semibold text-white leading-tight">MOSTYCOM</p>
+            <p class="text-sm text-slate-300">Travel Studio · Open Trip & Private Tour</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <a class="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition" href="#">
+            <span class="text-white text-sm font-semibold">IG</span>
+          </a>
+          <a class="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition" href="#">
+            <span class="text-white text-sm font-semibold">FB</span>
+          </a>
+          <a class="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition" href="#">
+            <span class="text-white text-sm font-semibold">YT</span>
+          </a>
+        </div>
       </div>
-      <div class="grid grid-cols-2 gap-4 text-sm">
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <div class="space-y-2">
-          <p class="text-white font-semibold">Menu</p>
-          <a href="#home" class="block hover:text-white">Home</a>
-          <a href="#trip" class="block hover:text-white">Trip</a>
-          <a href="#tracking" class="block hover:text-white">Tracking</a>
-          <a href="#artikel" class="block hover:text-white">Artikel</a>
+          <p class="font-semibold text-white">Company</p>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#home" class="hover:text-white">Beranda</a></li>
+            <li><a href="#packages" class="hover:text-white">Trip</a></li>
+            <li><a href="#community" class="hover:text-white">Tracking</a></li>
+          </ul>
         </div>
         <div class="space-y-2">
-          <p class="text-white font-semibold">Lainnya</p>
-          <a href="#testimoni" class="block hover:text-white">Testimoni</a>
-          <a href="#faq" class="block hover:text-white">FAQ</a>
-          <a href="#tentang" class="block hover:text-white">Tentang Kami</a>
-          <a href="#contact" class="block hover:text-white">Contact</a>
+          <p class="font-semibold text-white">Support</p>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#artikel" class="hover:text-white">Artikel</a></li>
+            <li><a href="#faq" class="hover:text-white">FAQ</a></li>
+            <li><a href="#contact" class="hover:text-white">Kontak</a></li>
+          </ul>
+        </div>
+        <div class="space-y-2">
+          <p class="font-semibold text-white">Hubungi Kami</p>
+          <ul class="space-y-2 text-sm">
+            <li class="text-slate-300">Email: hello@travelerx.id</li>
+            <li class="text-slate-300">Telp: +62 812-3456-7890</li>
+            <li class="text-slate-300">WhatsApp: +62 811-0000-000</li>
+          </ul>
+        </div>
+        <div class="space-y-3">
+          <p class="font-semibold text-white">Alamat</p>
+          <p class="text-sm text-slate-300">Jl. Panglima Polim No. 88, Jakarta</p>
+          <p class="text-xs text-slate-400">Senin - Jumat: 09.00 - 18.00 WIB<br>Sabtu: 10.00 - 15.00 WIB</p>
         </div>
       </div>
-      <div class="space-y-3">
-        <p class="text-white font-semibold">Social Media</p>
-        <div class="flex gap-4">
-          <a href="#" class="social-icon" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5">
-              <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
-              <circle cx="12" cy="12" r="3.5"></circle>
-              <circle cx="17.5" cy="6.5" r="1"></circle>
-            </svg>
-          </a>
-          <a href="#" class="social-icon" aria-label="Twitter">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5">
-              <path d="M19 3l-7 9-2-3-6 12"></path>
-              <path d="M12 12l8 8"></path>
-            </svg>
-          </a>
-          <a href="#" class="social-icon" aria-label="YouTube">
-            <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-              <path
-                d="M22 12s0-3.2-.4-4.7c-.2-.8-.8-1.4-1.6-1.6C18.5 5 12 5 12 5s-6.5 0-8 .7c-.8.2-1.4.8-1.6 1.6C2 8.8 2 12 2 12s0 3.2.4 4.7c.2.8.8 1.4 1.6 1.6 1.5.7 8 .7 8 .7s6.5 0 8-.7c.8-.2 1.4-.8 1.6-1.6.4-1.5.4-4.7.4-4.7z">
-              </path>
-              <path d="M10 9l5 3-5 3V9z" fill="#0f172a"></path>
-            </svg>
-          </a>
-        </div>
+
+      <div class="border-t border-white/10 pt-6 text-sm text-slate-400 text-center">
+        &copy; 2025 MOSTYCOM Travel Studio. All rights reserved.
       </div>
     </div>
-    <div class="mt-10 text-center text-xs text-slate-500">© 2024 MOSTYCOM. All rights reserved.</div>
   </footer>
-  <!-- Scripts -->
   <script>
-    window.LANDING_API_BASE_URL = window.LANDING_API_BASE_URL || '/public/api';
+    (() => {
+      const navToggle = document.getElementById('navToggle');
+      const navMenu = document.getElementById('navMenu');
+      if (navToggle && navMenu) {
+        navToggle.addEventListener('click', () => {
+          navMenu.classList.toggle('is-open');
+          const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+          navToggle.setAttribute('aria-expanded', (!expanded).toString());
+        });
+      }
+    })();
+
+    // Page loader hide after 1s
+    (() => {
+      const loader = document.getElementById('page-loader');
+      if (!loader) return;
+      const hide = () => {
+        loader.classList.add('is-hidden');
+        setTimeout(() => loader.remove(), 700);
+      };
+      window.addEventListener('load', () => {
+        setTimeout(hide, 1000);
+      });
+    })();
   </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/main.js"></script>
 </body>
 

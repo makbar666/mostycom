@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tripImagePreview = document.getElementById('trip-image-preview');
   const articleImagePreview = document.getElementById('article-image-preview');
   const tripImageInput = document.getElementById('trip-image-input');
+  const tripPhotosContainer = document.getElementById('trip-photos-list');
+  const tripPhotosEmptyState = document.getElementById('trip-photos-empty');
   const articleImageInput = document.getElementById('article-image-input');
   const tripForm = document.getElementById('trip-form');
   const articleForm = document.getElementById('article-form');
@@ -166,7 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let editingCustomerTripId = null;
   let editingFaqId = null;
   let editingUserId = null;
-  let tripImageDataUrl = null;
+  let tripPhotosDraft = [];
   let articleImageDataUrl = null;
   let contactHeaderImageDataUrl = null;
   let contactTrustImageDataUrl = null;
@@ -208,6 +210,133 @@ document.addEventListener('DOMContentLoaded', async () => {
     slot_tersedia: '',
     status: 'open'
   });
+
+  const generatePhotoTempId = () => `photo-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+  const createPhotoDraft = (photo = {}, index = 0) => ({
+    id: typeof photo.id === 'number' ? photo.id : (photo.id ? Number(photo.id) : null),
+    tempId: photo.tempId || generatePhotoTempId(),
+    photo_url: photo.photo_url || photo.photoUrl || null,
+    photo_full_url: photo.photo_full_url || photo.photoFullUrl || photo.photo_url || null,
+    preview_url: photo.preview_url || null,
+    image_base64: photo.image_base64 || null,
+    is_primary: Boolean(photo.is_primary),
+    sort_order: Number.isFinite(Number(photo.sort_order)) ? Number(photo.sort_order) : index + 1
+  });
+
+  const getPhotoPreviewSrc = (photo) => photo.preview_url || photo.photo_full_url || photo.photo_url || TRIP_PLACEHOLDER;
+
+  const ensureTripPhotoPrimary = () => {
+    if (!tripPhotosDraft.length) return;
+    let hasPrimary = false;
+    tripPhotosDraft.forEach((photo) => {
+      if (photo.is_primary && !hasPrimary) {
+        hasPrimary = true;
+        photo.is_primary = true;
+      } else {
+        photo.is_primary = false;
+      }
+    });
+    if (!hasPrimary && tripPhotosDraft[0]) {
+      tripPhotosDraft[0].is_primary = true;
+    }
+  };
+
+  const updateTripCoverPreview = () => {
+    if (!tripImagePreview) return;
+    if (!tripPhotosDraft.length) {
+      tripImagePreview.src = TRIP_PLACEHOLDER;
+      return;
+    }
+    const coverPhoto = tripPhotosDraft.find((photo) => photo.is_primary) || tripPhotosDraft[0];
+    tripImagePreview.src = getPhotoPreviewSrc(coverPhoto);
+  };
+
+  const renderTripPhotoCard = (photo, index) => {
+    const src = escapeHtml(getPhotoPreviewSrc(photo));
+    const isPrimary = Boolean(photo.is_primary);
+    return `
+      <div class="relative rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden" data-trip-photo="${index}">
+        <img src="${src}" alt="Trip photo ${index + 1}" class="w-full h-32 object-cover" />
+        ${isPrimary ? '<span class="absolute top-2 left-2 rounded-full bg-sky-600/90 text-white text-[10px] font-semibold px-2 py-0.5">Cover</span>' : ''}
+        <div class="flex items-center justify-between px-3 py-2 text-[11px] border-t border-slate-100 bg-slate-50/60">
+          <button type="button" class="font-semibold text-sky-600 hover:text-sky-800 transition" data-trip-photo-action="set-cover" data-trip-photo-index="${index}">Jadikan Cover</button>
+          <div class="flex items-center gap-1">
+            <button type="button" class="rounded-full border border-slate-200 px-2 py-1 hover:bg-white" data-trip-photo-action="move" data-trip-photo-direction="prev" data-trip-photo-index="${index}" aria-label="Geser kiri">←</button>
+            <button type="button" class="rounded-full border border-slate-200 px-2 py-1 hover:bg-white" data-trip-photo-action="move" data-trip-photo-direction="next" data-trip-photo-index="${index}" aria-label="Geser kanan">→</button>
+            <button type="button" class="font-semibold text-red-500 hover:text-red-700 transition" data-trip-photo-action="remove" data-trip-photo-index="${index}">Hapus</button>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  const renderTripPhotoDrafts = () => {
+    if (tripPhotosContainer) {
+      if (!tripPhotosDraft.length) {
+        tripPhotosContainer.innerHTML = '';
+        if (tripPhotosEmptyState) tripPhotosEmptyState.classList.remove('hidden');
+      } else {
+        tripPhotosContainer.innerHTML = tripPhotosDraft.map((photo, index) => renderTripPhotoCard(photo, index)).join('');
+        if (tripPhotosEmptyState) tripPhotosEmptyState.classList.add('hidden');
+      }
+    } else if (tripPhotosEmptyState && !tripPhotosDraft.length) {
+      tripPhotosEmptyState.classList.remove('hidden');
+    }
+    updateTripCoverPreview();
+  };
+
+  const initializePhotoDrafts = (photos = []) => {
+    if (Array.isArray(photos) && photos.length) {
+      tripPhotosDraft = photos.map((photo, index) => createPhotoDraft(photo, index));
+    } else {
+      tripPhotosDraft = [];
+    }
+    ensureTripPhotoPrimary();
+    renderTripPhotoDrafts();
+  };
+
+  const moveTripPhoto = (index, direction) => {
+    if (Number.isNaN(index) || !tripPhotosDraft[index]) return;
+    const targetIndex = direction === 'prev' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= tripPhotosDraft.length) return;
+    const [photo] = tripPhotosDraft.splice(index, 1);
+    tripPhotosDraft.splice(targetIndex, 0, photo);
+    renderTripPhotoDrafts();
+  };
+
+  const addTripPhotosFromFiles = async (files) => {
+    const list = Array.from(files || []);
+    if (!list.length) return;
+    const newDrafts = [];
+    for (const file of list) {
+      const dataUrl = await readFileAsDataUrl(file);
+      newDrafts.push(createPhotoDraft({
+        image_base64: dataUrl,
+        preview_url: dataUrl,
+        is_primary: false,
+        sort_order: tripPhotosDraft.length + newDrafts.length + 1
+      }));
+    }
+    tripPhotosDraft = tripPhotosDraft.concat(newDrafts);
+    ensureTripPhotoPrimary();
+    renderTripPhotoDrafts();
+  };
+
+  const buildTripPhotosPayload = () => tripPhotosDraft.map((photo, index) => {
+    const payload = {
+      sort_order: index + 1,
+      is_primary: Boolean(photo.is_primary)
+    };
+    if (photo.id) {
+      payload.id = photo.id;
+    } else if (photo.image_base64) {
+      payload.image_base64 = photo.image_base64;
+    } else if (photo.photo_url) {
+      payload.photo_url = photo.photo_url;
+    }
+    return payload;
+  }).filter((photo) => photo.id || photo.image_base64 || photo.photo_url);
 
   const mapServerRouteToDraft = (route) => ({
     nama_rute: route?.nama_rute || '',
@@ -387,7 +516,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const normalizeTripRecord = (trip) => {
     if (!trip || typeof trip !== 'object') {
-      return { routes: [] };
+      return { routes: [], photos: [] };
     }
     return {
       ...trip,
@@ -395,6 +524,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? trip.routes.map((route) => ({
           ...route,
           schedules: Array.isArray(route.schedules) ? route.schedules : []
+        }))
+        : [],
+      photos: Array.isArray(trip.photos)
+        ? trip.photos.map((photo, index) => ({
+          id: typeof photo.id === 'number' ? photo.id : (photo.id ? Number(photo.id) : null),
+          photo_url: photo.photo_url || null,
+          photo_full_url: photo.photo_full_url || photo.photo_url || null,
+          is_primary: Boolean(photo.is_primary),
+          sort_order: Number.isFinite(Number(photo.sort_order)) ? Number(photo.sort_order) : index + 1
         }))
         : []
     };
@@ -445,6 +583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   initializeRouteDrafts();
+  initializePhotoDrafts();
 
   if (tripRouteAddBtn) {
     tripRouteAddBtn.addEventListener('click', () => {
@@ -519,6 +658,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         tripRouteDrafts[routeIndex].schedules.splice(scheduleIndex, 1);
         renderTripRouteDrafts();
       }
+    });
+  }
+
+  if (tripPhotosContainer) {
+    tripPhotosContainer.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-trip-photo-action]');
+      if (!button) return;
+      const index = Number(button.dataset.tripPhotoIndex);
+      if (Number.isNaN(index) || !tripPhotosDraft[index]) return;
+      const action = button.dataset.tripPhotoAction;
+      if (action === 'move') {
+        const direction = button.dataset.tripPhotoDirection === 'prev' ? 'prev' : 'next';
+        moveTripPhoto(index, direction);
+        return;
+      }
+      if (action === 'set-cover') {
+        tripPhotosDraft.forEach((photo, photoIndex) => {
+          photo.is_primary = photoIndex === index;
+        });
+      } else if (action === 'remove') {
+        tripPhotosDraft.splice(index, 1);
+      }
+      ensureTripPhotoPrimary();
+      renderTripPhotoDrafts();
     });
   }
 
@@ -1292,12 +1455,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resetTripForm = () => {
     editingTripId = null;
     if (tripForm) tripForm.reset();
-    if (tripImagePreview) tripImagePreview.src = TRIP_PLACEHOLDER;
     if (tripImageInput) tripImageInput.value = '';
-    tripImageDataUrl = null;
     if (tripSaveBtn) tripSaveBtn.textContent = 'Simpan Trip';
     if (tripCancelBtn) tripCancelBtn.classList.add('hidden');
     initializeRouteDrafts();
+    initializePhotoDrafts();
   };
 
   const resetArticleForm = () => {
@@ -1369,12 +1531,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (tripForm.elements['trip-notes']) {
       tripForm.elements['trip-notes'].value = normalizedTrip.catatan_trip || '';
     }
-    if (tripImagePreview) tripImagePreview.src = normalizedTrip.gambar_url || TRIP_PLACEHOLDER;
     if (tripSaveBtn) tripSaveBtn.textContent = 'Update Trip';
     if (tripCancelBtn) tripCancelBtn.classList.remove('hidden');
     if (tripImageInput) tripImageInput.value = '';
-    tripImageDataUrl = null;
     initializeRouteDrafts(normalizedTrip.routes);
+    const photoDrafts = Array.isArray(normalizedTrip.photos) && normalizedTrip.photos.length
+      ? normalizedTrip.photos
+      : (normalizedTrip.gambar_url ? [{ photo_full_url: normalizedTrip.gambar_url, is_primary: true }] : []);
+    initializePhotoDrafts(photoDrafts);
   };
 
   const startArticleEdit = (article) => {
@@ -1488,22 +1652,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  if (tripImageInput && tripImagePreview) {
+  if (tripImageInput) {
     tripImageInput.addEventListener('change', async () => {
-      const file = tripImageInput.files[0];
-      if (!file) {
-        tripImagePreview.src = TRIP_PLACEHOLDER;
-        tripImageDataUrl = null;
-        return;
-      }
       try {
-        const dataUrl = await readFileAsDataUrl(file);
-        tripImagePreview.src = dataUrl;
-        tripImageDataUrl = dataUrl;
+        await addTripPhotosFromFiles(tripImageInput.files);
       } catch (error) {
         console.warn(error);
-        tripImagePreview.src = TRIP_PLACEHOLDER;
-        tripImageDataUrl = null;
+        alert('Gagal membaca file foto. Pastikan format gambar valid lalu coba lagi.');
+      } finally {
+        tripImageInput.value = '';
       }
     });
   }
@@ -1615,16 +1772,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         catatan_trip: notesValue
       };
 
-      if (tripImageDataUrl) {
-        payload.image_base64 = tripImageDataUrl;
-      }
-
       const routesPayload = buildRoutePayload();
       if (!routesPayload.length) {
         alert('Minimal 1 rute dengan nama harus diisi sebelum menyimpan trip.');
         return;
       }
       payload.routes = routesPayload;
+
+      const photosPayload = buildTripPhotosPayload();
+      if (!photosPayload.length) {
+        alert('Minimal 1 foto destinasi harus diunggah.');
+        return;
+      }
+      payload.photos = photosPayload;
 
       const isEdit = Boolean(editingTripId);
       const submitBtn = tripSaveBtn;
