@@ -34,6 +34,52 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tripRouteEmptyState = document.getElementById('trip-route-empty');
   const articleSaveBtn = document.getElementById('article-save-btn');
   const articleCancelBtn = document.getElementById('article-cancel-btn');
+  const invoiceForm = document.getElementById('invoice-form');
+  const invoiceItemsContainer = document.getElementById('invoice-items');
+  const invoiceItemsEmptyState = document.getElementById('invoice-items-empty');
+  const invoiceAddItemBtn = document.getElementById('invoice-add-item');
+  const invoiceGenerateBtn = document.getElementById('invoice-generate-btn');
+  const invoiceResetBtn = document.getElementById('invoice-reset-btn');
+  const invoiceFormStatus = document.getElementById('invoice-form-status');
+  const invoicePreviewNode = document.getElementById('invoice-preview');
+  const invoicePreviewNumber = document.getElementById('invoice-preview-number');
+  const invoicePreviewIssue = document.getElementById('invoice-preview-issue');
+  const invoicePreviewDue = document.getElementById('invoice-preview-due');
+  const invoicePreviewClient = document.getElementById('invoice-preview-client');
+  const invoicePreviewContact = document.getElementById('invoice-preview-contact');
+  const invoicePreviewTrip = document.getElementById('invoice-preview-trip');
+  const invoicePreviewPayment = document.getElementById('invoice-preview-payment');
+  const invoicePreviewNotes = document.getElementById('invoice-preview-notes');
+  const invoiceCurrencySelect = document.getElementById('invoice-currency');
+  const invoicePreviewItems = document.getElementById('invoice-preview-items');
+  const invoicePreviewSubtotal = document.getElementById('invoice-preview-subtotal');
+  const invoicePreviewTax = document.getElementById('invoice-preview-tax');
+  const invoicePreviewTotal = document.getElementById('invoice-preview-total');
+  const invoicePreviewStatus = document.getElementById('invoice-preview-status');
+  const invoicePrintBtn = document.getElementById('invoice-print-btn');
+  const invoicePdfBtn = document.getElementById('invoice-pdf-btn');
+  const invoiceDownloadBtn = document.getElementById('invoice-download-btn');
+  const invoiceTypeSelect = document.getElementById('invoice-type');
+  const invoiceFromInput = invoiceForm ? invoiceForm.querySelector('[name="invoice-from"]') : null;
+  const invoiceTotalUsdInput = document.getElementById('invoice-total-usd');
+  const invoiceFxRateInput = document.getElementById('invoice-fx-rate');
+  const invoiceFxRateJpyInput = document.getElementById('invoice-fx-rate-jpy');
+  const invoiceFxRateJpyLabel = document.querySelector('label[for="invoice-fx-rate-jpy"]');
+  const invoiceRateUsdInput = document.getElementById('invoice-rate-usd');
+  if (invoiceFxRateJpyLabel) {
+    invoiceFxRateJpyLabel.textContent = 'IDR per JPY';
+  }
+  const invoiceTotalIdrInput = document.getElementById('invoice-total-idr');
+  const invoiceTotalJpyInput = document.getElementById('invoice-total-jpy');
+  const invoiceFetchRateBtn = document.getElementById('invoice-fetch-rate'); // removed from UI, kept for backward compatibility
+  const invoiceFxTitleNode = document.querySelector('[data-invoice-fx-title]');
+  const invoiceFxTotalLabelNode = document.querySelector('[data-invoice-fx-total-label]');
+  const invoiceFxRateLabelNode = document.querySelector('[data-invoice-fx-rate-label]');
+  const invoiceFxConvertedLabelNode = document.querySelector('[data-invoice-fx-converted-label]');
+  const invoiceFxHelperNode = document.querySelector('[data-invoice-fx-helper]');
+  const invoiceDpToggle = document.getElementById('invoice-dp-toggle');
+  const invoiceDpAmountInput = document.getElementById('invoice-dp-amount');
+  const invoiceDpInputGroup = document.getElementById('invoice-dp-input-group');
 
   const nameValue = user?.name || 'User';
   const roleValue = user?.role || 'CMS Manager';
@@ -149,6 +195,63 @@ document.addEventListener('DOMContentLoaded', async () => {
     trust_image_url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=200&q=80'
   };
 
+  const INVOICE_CURRENCIES = {
+    IDR: { label: 'Rupiah', symbol: 'Rp', currency: 'IDR', locale: 'id-ID', fractionDigits: 0 },
+    USD: { label: 'US Dollar', symbol: '$', currency: 'USD', locale: 'en-US', fractionDigits: 2 },
+    JPY: { label: 'Yen', symbol: '¥', currency: 'JPY', locale: 'ja-JP', fractionDigits: 0 }
+  };
+  const invoiceCurrencyFormatterCache = {};
+  const normalizeInvoiceCurrencyCode = (code) => {
+    const normalized = (code || '').toString().trim().toUpperCase();
+    return INVOICE_CURRENCIES[normalized] ? normalized : 'IDR';
+  };
+  const getInvoiceCurrencyConfig = (code) => INVOICE_CURRENCIES[normalizeInvoiceCurrencyCode(code)];
+  const formatInvoiceCurrency = (value, code) => {
+    const config = getInvoiceCurrencyConfig(code);
+    const cacheKey = `${config.locale}-${config.currency}-${config.fractionDigits}`;
+    if (!invoiceCurrencyFormatterCache[cacheKey]) {
+      invoiceCurrencyFormatterCache[cacheKey] = new Intl.NumberFormat(config.locale, {
+        style: 'currency',
+        currency: config.currency,
+        minimumFractionDigits: config.fractionDigits,
+        maximumFractionDigits: config.fractionDigits
+      });
+    }
+    const formatter = invoiceCurrencyFormatterCache[cacheKey];
+    return formatter.format(Number.isFinite(Number(value)) ? Number(value) : 0);
+  };
+
+  const INVOICE_TYPES = {
+    QUOTATION: 'Quotation',
+    BILLING: 'Billing',
+    PAYMENT: 'Payment'
+  };
+  const getInvoiceTypeLabel = (type) => INVOICE_TYPES[type] || INVOICE_TYPES.BILLING;
+  const getInvoiceFxContext = () => {
+    const baseCurrency = normalizeInvoiceCurrencyCode(invoiceDraft?.currencyCode);
+    const baseLabel = getInvoiceCurrencyConfig(baseCurrency).currency;
+    return {
+      baseCurrency,
+      labels: {
+        title: `Kurs & Total ${baseLabel}`,
+        totalBase: 'Total USD',
+        totalConverted: baseCurrency === 'USD' ? 'Total IDR' : `Total ${baseLabel}`,
+        totalUsd: 'Total USD',
+        rate: baseCurrency === 'JPY' ? 'Kurs Yen' : 'Kurs IDR'
+      }
+    };
+  };
+  const updateInvoiceCurrencyUi = () => {
+    const fxContext = getInvoiceFxContext();
+    if (invoiceFxTitleNode) invoiceFxTitleNode.textContent = fxContext.labels.title;
+    if (invoiceFxTotalLabelNode) invoiceFxTotalLabelNode.textContent = fxContext.labels.totalBase;
+    if (invoiceFxRateLabelNode) invoiceFxRateLabelNode.textContent = fxContext.labels.rate;
+    if (invoiceFxConvertedLabelNode) invoiceFxConvertedLabelNode.textContent = fxContext.labels.totalConverted;
+    if (invoiceFxHelperNode) {
+      invoiceFxHelperNode.textContent = '';
+    }
+  };
+
   let trips = [];
   let articles = [];
   let testimonials = [];
@@ -173,6 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let contactHeaderImageDataUrl = null;
   let contactTrustImageDataUrl = null;
   let tripRouteDrafts = [];
+  let invoiceDraft = null;
 
   const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -192,6 +296,180 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   const normalizeInputValue = (value) => (value === null || value === undefined ? '' : String(value));
+
+  const formatCurrency = (value) => new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(Number.isFinite(Number(value)) ? Number(value) : 0);
+
+  const formatInvoiceMoney = (value) => formatInvoiceCurrency(value, invoiceDraft?.currencyCode);
+
+  const formatDateOnly = (value) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return new Intl.DateTimeFormat('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).format(date);
+  };
+
+  const formatDateInputValue = (date) => {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const parseMoneyInput = (value) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : 0;
+  };
+
+  const fetchUsdRates = async () => {
+    const urls = [
+      'https://open.er-api.com/v6/latest/USD',
+      'https://api.exchangerate.host/latest?base=USD&symbols=IDR,JPY'
+    ];
+    for (const url of urls) {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        const rates = data?.rates || data?.result;
+        const idr = parseMoneyInput(rates?.IDR || rates?.idr);
+        const jpy = parseMoneyInput(rates?.JPY || rates?.jpy);
+        if (idr > 0 && jpy > 0) {
+          const idrPerJpy = jpy > 0 ? idr / jpy : DEFAULT_IDR_PER_JPY_RATE;
+          return { idr, idrPerJpy };
+        }
+        if (idr > 0) {
+          return { idr, idrPerJpy: DEFAULT_IDR_PER_JPY_RATE };
+        }
+      } catch (error) {
+        console.warn('Gagal mengambil kurs dari', url, error);
+      }
+    }
+    throw new Error('Kurs USD/IDR/JPY tidak tersedia.');
+  };
+
+  const createEmptyInvoiceItem = (description = '', qty = 1, price = 0) => ({
+    description,
+    qty: Number.isFinite(Number(qty)) ? Number(qty) : 1,
+    price: Number.isFinite(Number(price)) ? Number(price) : 0
+  });
+
+  const DEFAULT_USD_IDR_RATE = 15500;
+  const DEFAULT_USD_JPY_RATE = 150;
+  const DEFAULT_IDR_PER_JPY_RATE = Number((DEFAULT_USD_IDR_RATE / DEFAULT_USD_JPY_RATE).toFixed(4));
+
+  const getDefaultInvoiceDraft = () => {
+    const today = new Date();
+    return {
+      number: `INV-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-001`,
+      issueDate: formatDateInputValue(today),
+      client: 'Nama Client',
+      notes: [
+        'BNI',
+        '7724472443',
+        'A/n MABARAKKA MOSLEM MODESTY PT',
+        '',
+      ].join('\n'),
+      currencySymbol: INVOICE_CURRENCIES.IDR.symbol,
+      currencyCode: 'IDR',
+      type: 'BILLING',
+      fromName: ['Asti Nurrahmadani Safri Sappe', '(PT MABARAKKA MOSLEM MODESTY)'].join('\n'),
+      fromCompany: '',
+      paymentFootnote: '*Kurs akan diupdate saat hari pembayaran',
+      dpEnabled: false,
+      dpAmount: 0,
+      totalUsd: 0,
+      fxRate: DEFAULT_USD_IDR_RATE,
+      fxRateJpy: DEFAULT_IDR_PER_JPY_RATE,
+      totalIdr: 0,
+      manualTotalUsd: 0,
+      manualTotalIdr: 0,
+      manualTotalJpy: 0,
+      items: [
+        createEmptyInvoiceItem('Down Payment', 1, 0)
+      ]
+    };
+  };
+
+  const syncInvoiceDpUi = () => {
+    if (invoiceDpToggle) {
+      invoiceDpToggle.checked = Boolean(invoiceDraft.dpEnabled);
+    }
+    if (invoiceDpInputGroup) {
+      invoiceDpInputGroup.classList.toggle('hidden', !invoiceDraft.dpEnabled);
+    }
+    if (invoiceDpAmountInput) {
+      invoiceDpAmountInput.disabled = !invoiceDraft.dpEnabled;
+      if (invoiceDraft.dpEnabled) {
+        invoiceDpAmountInput.value = normalizeInputValue(invoiceDraft.dpAmount || 0);
+      } else {
+        invoiceDpAmountInput.value = '';
+      }
+    }
+  };
+
+  invoiceDraft = getDefaultInvoiceDraft();
+  syncInvoiceDpUi();
+
+  const getInvoiceDownloadName = () => {
+    const raw = invoiceDraft?.number || 'invoice-mostycom';
+    return raw.replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'invoice-mostycom';
+  };
+
+  const updateDerivedFxTotals = (totals) => {
+    const invoiceTotal = totals?.total || 0;
+    const dpAmount = totals?.dpAmount || 0;
+    const fxRateValue = parseMoneyInput(invoiceDraft.fxRate);
+    const currencyCode = normalizeInvoiceCurrencyCode(invoiceDraft.currencyCode);
+    invoiceDraft.currencyCode = currencyCode;
+    let convertedDp = dpAmount;
+    if (currencyCode === 'USD') {
+      invoiceDraft.totalUsd = invoiceTotal;
+      invoiceDraft.totalIdr = fxRateValue > 0 ? Math.round(invoiceTotal * fxRateValue) : 0;
+      convertedDp = fxRateValue > 0 ? Math.round(dpAmount * fxRateValue) : dpAmount;
+    } else {
+      invoiceDraft.totalIdr = invoiceTotal;
+      invoiceDraft.totalUsd = fxRateValue > 0 ? Number((invoiceTotal / fxRateValue).toFixed(2)) : 0;
+      convertedDp = dpAmount;
+    }
+    if (invoiceTotalUsdInput) invoiceTotalUsdInput.value = normalizeInputValue(invoiceDraft.totalUsd);
+    if (invoiceTotalIdrInput) invoiceTotalIdrInput.value = normalizeInputValue(invoiceDraft.totalIdr);
+    invoiceDraft.dpConverted = convertedDp;
+    return { convertedDp, fxRateValue };
+  };
+
+  const getFxRateSnapshot = (overrides = {}) => {
+    const usdIdrCandidate = (() => {
+      if (typeof overrides.usdIdr === 'number' && overrides.usdIdr > 0) {
+        return overrides.usdIdr;
+      }
+      const candidate = parseMoneyInput(invoiceDraft.fxRate);
+      return candidate > 0 ? candidate : DEFAULT_USD_IDR_RATE;
+    })();
+
+    const idrPerJpyCandidate = (() => {
+      const candidate = parseMoneyInput(invoiceDraft.fxRateJpy);
+      return candidate > 0 ? candidate : DEFAULT_IDR_PER_JPY_RATE;
+    })();
+
+    const jpyPerUsd = usdIdrCandidate > 0 && idrPerJpyCandidate > 0
+      ? usdIdrCandidate / idrPerJpyCandidate
+      : 0;
+
+    return {
+      usdIdr: usdIdrCandidate,
+      idrPerJpy: idrPerJpyCandidate,
+      jpyPerUsd
+    };
+  };
 
   const createEmptyRouteDraft = () => ({
     nama_rute: '',
@@ -337,6 +615,740 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     return payload;
   }).filter((photo) => photo.id || photo.image_base64 || photo.photo_url);
+
+  const calculateInvoiceTotals = () => {
+    const subtotal = invoiceDraft.items.reduce((acc, item) => {
+      const qty = Number.isFinite(Number(item.qty)) ? Number(item.qty) : 0;
+      const price = Number.isFinite(Number(item.price)) ? Number(item.price) : 0;
+      return acc + (qty * price);
+    }, 0);
+    const tax = 0;
+    const grossTotal = subtotal;
+    const dpRaw = invoiceDraft.dpEnabled ? parseMoneyInput(invoiceDraft.dpAmount) : 0;
+    const dpAmount = Math.min(Math.max(dpRaw, 0), grossTotal);
+    invoiceDraft.dpAmount = dpAmount;
+    return {
+      subtotal,
+      tax,
+      grossTotal,
+      dpAmount,
+      total: Math.max(grossTotal - dpAmount, 0)
+    };
+  };
+
+  const showInvoiceFormStatus = (message) => {
+    if (!invoiceFormStatus) return;
+    invoiceFormStatus.textContent = message || 'Invoice diperbarui';
+    invoiceFormStatus.classList.remove('hidden');
+    setTimeout(() => invoiceFormStatus.classList.add('hidden'), 2200);
+  };
+
+  const showInvoicePreviewStatus = (message) => {
+    if (!invoicePreviewStatus) return;
+    invoicePreviewStatus.textContent = message || 'Pratinjau diperbarui';
+    invoicePreviewStatus.classList.remove('hidden');
+    setTimeout(() => invoicePreviewStatus.classList.add('hidden'), 2200);
+  };
+
+  const renderInvoiceItemsForm = () => {
+    if (!invoiceItemsContainer) return;
+    if (!invoiceDraft.items.length) {
+      invoiceItemsContainer.innerHTML = '';
+      if (invoiceItemsEmptyState) invoiceItemsEmptyState.classList.remove('hidden');
+      return;
+    }
+    if (invoiceItemsEmptyState) invoiceItemsEmptyState.classList.add('hidden');
+    invoiceItemsContainer.innerHTML = invoiceDraft.items.map((item, index) => `
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm" data-invoice-item="${index}">
+        <div class="grid md:grid-cols-5 gap-3">
+          <div class="md:col-span-3">
+            <label class="text-xs font-semibold text-slate-500 uppercase">Deskripsi</label>
+            <input type="text" data-invoice-field="description" data-invoice-index="${index}"
+              class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              placeholder="Deskripsi layanan" value="${escapeHtml(item.description || '')}" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-500 uppercase">Qty</label>
+            <input type="number" min="0" step="1" data-invoice-field="qty" data-invoice-index="${index}"
+              class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              value="${escapeHtml(normalizeInputValue(item.qty || 1))}" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-500 uppercase">Harga</label>
+            <input type="number" min="0" step="50000" data-invoice-field="price" data-invoice-index="${index}"
+              class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              value="${escapeHtml(normalizeInputValue(item.price || 0))}" />
+          </div>
+        </div>
+        <div class="mt-2 flex items-center justify-between text-xs text-slate-600">
+          <span>Line total:
+            <span class="font-semibold text-slate-900" data-invoice-line-total="${index}">${formatInvoiceMoney((item.qty || 0) * (item.price || 0))}</span>
+          </span>
+          <button type="button" class="text-red-500 font-semibold hover:text-red-700 transition" data-invoice-item-remove="${index}">Hapus</button>
+        </div>
+      </div>
+    `).join('');
+  };
+
+  const renderInvoicePreview = (showStatus = false) => {
+    if (!invoicePreviewNode) return;
+    const totals = calculateInvoiceTotals();
+    const fxMeta = updateDerivedFxTotals(totals);
+    const fxContext = getInvoiceFxContext();
+    const dpAmount = totals.dpAmount || 0;
+    const dpActive = Boolean(invoiceDraft.dpEnabled);
+    const { usdIdr, idrPerJpy, jpyPerUsd } = getFxRateSnapshot({
+      usdIdr: fxMeta && fxMeta.fxRateValue !== undefined ? fxMeta.fxRateValue : undefined
+    });
+    const baseCode = normalizeInvoiceCurrencyCode(invoiceDraft.currencyCode);
+    const itemRows = (() => {
+      const rows = invoiceDraft.items.length
+        ? invoiceDraft.items.map((item, index) => {
+          const qty = Number.isFinite(Number(item.qty)) ? Number(item.qty) : 0;
+          const price = Number.isFinite(Number(item.price)) ? Number(item.price) : 0;
+          const lineTotal = qty * price;
+          return `
+            <tr class="border-b border-slate-200 last:border-b-0">
+              <td class="py-2 px-3 text-sm text-slate-700 text-center">${index + 1}.</td>
+              <td class="py-2 px-3 text-sm text-slate-700">${escapeHtml(item.description || '-')}</td>
+              <td class="py-2 px-3 text-sm text-slate-700 text-right">${formatInvoiceMoney(price)}</td>
+              <td class="py-2 px-3 text-sm text-slate-700 text-center">${qty}</td>
+              <td class="py-2 px-3 text-sm text-slate-800 text-right font-semibold">${formatInvoiceMoney(lineTotal)}</td>
+            </tr>
+          `;
+        })
+        : [];
+
+      if (dpActive && dpAmount > 0) {
+        rows.push(`
+          <tr class="border-b border-slate-200 last:border-b-0 bg-slate-50">
+            <td class="py-2 px-3 text-sm text-slate-700 text-center">${rows.length + 1}.</td>
+            <td class="py-2 px-3 text-sm text-slate-700">Down Payment (DP)</td>
+            <td class="py-2 px-3 text-sm text-slate-700 text-right">-</td>
+            <td class="py-2 px-3 text-sm text-slate-700 text-center">-</td>
+            <td class="py-2 px-3 text-sm text-red-600 text-right font-semibold">${formatInvoiceMoney(dpAmount)}</td>
+          </tr>
+        `);
+      }
+
+      if (!rows.length) {
+        return '<tr><td colspan="5" class="py-3 px-3 text-center text-slate-400 text-sm">Belum ada item.</td></tr>';
+      }
+      return rows.join('');
+    })();
+
+    const paymentInfoLines = (invoiceDraft.notes || '').split(/\r?\n/);
+    while (paymentInfoLines.length && !paymentInfoLines[0].trim()) paymentInfoLines.shift();
+    while (paymentInfoLines.length && !paymentInfoLines[paymentInfoLines.length - 1].trim()) paymentInfoLines.pop();
+    const paymentLines = paymentInfoLines.length
+      ? paymentInfoLines.map((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return '<div class="h-2"></div>';
+        }
+        return `<p class="text-sm text-slate-700 leading-6">${escapeHtml(trimmed)}</p>`;
+      }).join('')
+      : '<p class="text-slate-400">Belum ada detail pembayaran.</p>';
+
+    const fxDisplays = (() => {
+      const netTotal = totals.total || 0;
+      let totalUsd = '-';
+      let totalIdr = '-';
+      let totalJpy = '-';
+      const manualUsd = parseMoneyInput(invoiceDraft.manualTotalUsd);
+      const manualIdr = parseMoneyInput(invoiceDraft.manualTotalIdr);
+      const manualJpy = parseMoneyInput(invoiceDraft.manualTotalJpy);
+      if (manualUsd > 0) totalUsd = formatInvoiceCurrency(manualUsd, 'USD');
+      if (manualIdr > 0) totalIdr = formatInvoiceCurrency(manualIdr, 'IDR');
+      if (manualJpy > 0) totalJpy = formatInvoiceCurrency(manualJpy, 'JPY');
+
+      if (manualUsd > 0 || manualIdr > 0 || manualJpy > 0) {
+        return {
+          totalUsd,
+          totalIdr,
+          totalJpy,
+          dpConverted: manualIdr > 0 && dpAmount > 0 ? formatInvoiceCurrency(dpAmount, 'IDR') : ''
+        };
+      }
+
+      if (baseCode === 'USD') {
+        totalUsd = formatInvoiceCurrency(netTotal, 'USD');
+        totalIdr = usdIdr > 0 ? formatInvoiceCurrency(Math.round(netTotal * usdIdr), 'IDR') : '-';
+        totalJpy = jpyPerUsd > 0 ? formatInvoiceCurrency(Math.round(netTotal * jpyPerUsd), 'JPY') : '-';
+      } else if (baseCode === 'IDR') {
+        totalIdr = formatInvoiceCurrency(netTotal, 'IDR');
+        totalUsd = usdIdr > 0 ? formatInvoiceCurrency(Number((netTotal / usdIdr).toFixed(2)), 'USD') : '-';
+        totalJpy = idrPerJpy > 0 ? formatInvoiceCurrency(Math.round(netTotal / idrPerJpy), 'JPY') : '-';
+      } else if (baseCode === 'JPY') {
+        totalJpy = formatInvoiceCurrency(netTotal, 'JPY');
+        totalIdr = idrPerJpy > 0 ? formatInvoiceCurrency(Math.round(netTotal * idrPerJpy), 'IDR') : '-';
+        totalUsd = jpyPerUsd > 0 ? formatInvoiceCurrency(Number((netTotal / jpyPerUsd).toFixed(2)), 'USD') : '-';
+      }
+
+      const dpConverted = (() => {
+        if (dpAmount <= 0) return 0;
+        if (baseCode === 'USD') return usdIdr > 0 ? Math.round(dpAmount * usdIdr) : 0;
+        if (baseCode === 'IDR') return dpAmount;
+        if (baseCode === 'JPY') return dpAmount;
+        return 0;
+      })();
+
+      return {
+        totalUsd,
+        totalIdr,
+        totalJpy,
+        dpConverted: dpConverted > 0 ? formatInvoiceCurrency(dpConverted, baseCode === 'JPY' ? 'JPY' : 'IDR') : ''
+      };
+    })();
+
+    const finalTotalLabel = dpActive ? 'Total Setelah DP' : 'Total';
+    const convertedLabel = dpActive ? `${fxContext.labels.totalConverted} (setelah DP)` : fxContext.labels.totalConverted;
+    const dpConvertedDisplay = fxDisplays.dpConverted || formatInvoiceCurrency(0, baseCode === 'JPY' ? 'JPY' : 'IDR');
+    const dpRow = dpActive
+      ? `
+        <tr class="bg-white text-slate-700">
+          <td class="px-3 py-2 font-semibold">Down Payment (DP)</td>
+          <td class="px-3 py-2 text-right">${dpConvertedDisplay}</td>
+        </tr>
+      `
+      : '';
+
+    const totalsBox = `
+      <table class="w-full text-sm border border-slate-300">
+        <tr class="bg-slate-900 text-white">
+          <td class="px-3 py-2 font-semibold uppercase tracking-wide">Total USD</td>
+          <td class="px-3 py-2 font-semibold text-right">${fxDisplays.totalUsd}</td>
+        </tr>
+        <tr class="bg-slate-50 text-slate-700">
+          <td class="px-3 py-2 font-semibold">Total IDR</td>
+          <td class="px-3 py-2 text-right">${fxDisplays.totalIdr}</td>
+        </tr>
+        <tr class="bg-white text-slate-700">
+          <td class="px-3 py-2 font-semibold">Total Yen</td>
+          <td class="px-3 py-2 text-right">${fxDisplays.totalJpy || '-'}</td>
+        </tr>
+        ${dpRow}
+        <tr class="bg-slate-900 text-white text-base">
+          <td class="px-3 py-2 font-bold uppercase">${finalTotalLabel}</td>
+          <td class="px-3 py-2 font-bold text-right">${formatInvoiceMoney(totals.total)}</td>
+        </tr>
+      </table>
+    `;
+
+    invoicePreviewNode.innerHTML = `
+      <div class="invoice-template border border-slate-200 rounded-3xl overflow-hidden shadow-sm bg-white">
+        <div class="border-b border-slate-200">
+          <div class="flex items-center justify-between px-6 py-5">
+            <img src="assets/logo_invoice.png" alt="Logo" class="h-16 object-contain" onerror="this.style.display='none'">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-400">MABARAKKA</p>
+              <p class="text-sm font-semibold text-slate-600">Moslem Modesty</p>
+            </div>
+          </div>
+          <div class="flex items-center w-full">
+            <div class="h-12 w-24 bg-[#123c61]"></div>
+            <div class="h-12 flex-1 bg-[#123c61] flex items-center justify-center">
+              <span class="text-white text-3xl font-extrabold tracking-[0.18em] border-b-2 border-white pb-0.5">${getInvoiceTypeLabel(invoiceDraft.type).toUpperCase()}</span>
+            </div>
+            <div class="h-12 w-12 bg-[#123c61]"></div>
+          </div>
+        </div>
+        <div class="px-8 py-6 space-y-6">
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <p class="text-xs uppercase text-slate-500 tracking-[0.2em]">Bill To:</p>
+              <p class="mt-2 text-lg font-semibold text-slate-900">${escapeHtml(invoiceDraft.client || 'Nama Client')}</p>
+            </div>
+              <div class="text-sm text-slate-700 leading-6">
+                <p>${getInvoiceTypeLabel(invoiceDraft.type)}# : <span class="font-semibold">${escapeHtml(invoiceDraft.number || '-')}</span></p>
+                <p>Date : <span class="font-semibold">${formatDateOnly(invoiceDraft.issueDate)}</span></p>
+              </div>
+          </div>
+          <div>
+            <p class="text-xs uppercase text-slate-500 tracking-[0.2em]">From To :</p>
+            <div class="mt-2 space-y-1 text-sm font-semibold text-slate-900">
+              ${escapeHtml((invoiceDraft.fromName || '').trim()).split('\n').filter(Boolean).map((line) => `<p>${line}</p>`).join('') || '<p>-</p>'}
+            </div>
+          </div>
+          <table class="w-full text-sm border border-slate-200">
+            <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
+              <tr>
+                <th class="py-2 px-3 text-center w-12">No</th>
+                <th class="py-2 px-3 text-left">Item</th>
+                <th class="py-2 px-3 text-right w-32">Price</th>
+                <th class="py-2 px-3 text-center w-16">Qty</th>
+                <th class="py-2 px-3 text-right w-32">Amount</th>
+              </tr>
+            </thead>
+            <tbody class="text-slate-800">${itemRows}</tbody>
+          </table>
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="md:col-span-1">${totalsBox}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    if (showStatus) {
+      showInvoicePreviewStatus('Pratinjau diperbarui');
+    }
+  };
+  const hydrateInvoiceForm = () => {
+    if (!invoiceForm) return;
+    const setValue = (name, value) => {
+      const field = invoiceForm.querySelector(`[name="${name}"]`);
+      if (field) field.value = value || '';
+    };
+    setValue('invoice-number', invoiceDraft.number);
+    setValue('invoice-date', invoiceDraft.issueDate);
+    setValue('invoice-client', invoiceDraft.client);
+    setValue('invoice-notes', invoiceDraft.notes);
+    setValue('invoice-total-usd', normalizeInputValue(invoiceDraft.totalUsd));
+    setValue('invoice-fx-rate', normalizeInputValue(invoiceDraft.fxRate));
+    setValue('invoice-total-idr', normalizeInputValue(invoiceDraft.totalIdr));
+    if (invoiceCurrencySelect) {
+      invoiceCurrencySelect.value = invoiceDraft.currencyCode || normalizeInvoiceCurrencyCode();
+    }
+    if (invoiceTypeSelect) {
+      invoiceTypeSelect.value = invoiceDraft.type || 'BILLING';
+    }
+    if (invoiceFromInput) {
+      const combined = [invoiceDraft.fromName, invoiceDraft.fromCompany].filter(Boolean).join('\n').trim();
+      invoiceFromInput.value = combined || '';
+    }
+    if (invoiceFxRateInput) {
+      invoiceFxRateInput.value = normalizeInputValue(invoiceDraft.fxRate);
+    }
+    if (invoiceFxRateJpyInput) {
+      invoiceFxRateJpyInput.value = normalizeInputValue(invoiceDraft.fxRateJpy);
+    }
+    if (invoiceRateUsdInput) {
+      invoiceRateUsdInput.value = '1';
+    }
+    if (invoiceTotalUsdInput) {
+      invoiceTotalUsdInput.value = normalizeInputValue(invoiceDraft.manualTotalUsd);
+    }
+    if (invoiceTotalIdrInput) {
+      invoiceTotalIdrInput.value = normalizeInputValue(invoiceDraft.manualTotalIdr);
+    }
+    if (invoiceTotalJpyInput) {
+      invoiceTotalJpyInput.value = normalizeInputValue(invoiceDraft.manualTotalJpy);
+    }
+    syncInvoiceDpUi();
+  };
+  const resetInvoiceDraft = () => {
+    invoiceDraft = getDefaultInvoiceDraft();
+    renderInvoiceItemsForm();
+    hydrateInvoiceForm();
+    renderInvoicePreview(true);
+    showInvoiceFormStatus('Form invoice direset');
+  };
+
+  const updateInvoiceLineTotal = (index) => {
+    const node = document.querySelector(`[data-invoice-line-total="${index}"]`);
+    const item = invoiceDraft.items[index];
+    if (node && item) {
+      const qty = Number.isFinite(Number(item.qty)) ? Number(item.qty) : 0;
+      const price = Number.isFinite(Number(item.price)) ? Number(item.price) : 0;
+      node.textContent = formatInvoiceMoney(qty * price);
+    }
+  };
+
+  const buildInvoicePrintTemplate = () => {
+    const totals = calculateInvoiceTotals();
+    const fxMeta = updateDerivedFxTotals(totals);
+    const fxContext = getInvoiceFxContext();
+    const dpAmount = totals.dpAmount || 0;
+    const dpActive = Boolean(invoiceDraft.dpEnabled);
+    const finalTotalLabel = dpActive ? 'Total' : 'Total';
+    const { usdIdr, idrPerJpy, jpyPerUsd } = getFxRateSnapshot({
+      usdIdr: fxMeta && fxMeta.fxRateValue !== undefined ? fxMeta.fxRateValue : undefined
+    });
+    const baseCode = normalizeInvoiceCurrencyCode(invoiceDraft.currencyCode);
+    const fxDisplays = (() => {
+      const netTotal = totals.total || 0;
+      let autoUsd = '-';
+      let autoIdr = '-';
+      let autoJpy = '-';
+
+      if (baseCode === 'USD') {
+        autoUsd = formatInvoiceCurrency(netTotal, 'USD');
+        autoIdr = usdIdr > 0 ? formatInvoiceCurrency(Math.round(netTotal * usdIdr), 'IDR') : '-';
+        autoJpy = jpyPerUsd > 0 ? formatInvoiceCurrency(Math.round(netTotal * jpyPerUsd), 'JPY') : '-';
+      } else if (baseCode === 'IDR') {
+        autoIdr = formatInvoiceCurrency(netTotal, 'IDR');
+        autoUsd = usdIdr > 0 ? formatInvoiceCurrency(Number((netTotal / usdIdr).toFixed(2)), 'USD') : '-';
+        autoJpy = idrPerJpy > 0 ? formatInvoiceCurrency(Math.round(netTotal / idrPerJpy), 'JPY') : '-';
+      } else if (baseCode === 'JPY') {
+        autoJpy = formatInvoiceCurrency(netTotal, 'JPY');
+        autoUsd = jpyPerUsd > 0 ? formatInvoiceCurrency(Number((netTotal / jpyPerUsd).toFixed(2)), 'USD') : '-';
+        autoIdr = idrPerJpy > 0 ? formatInvoiceCurrency(Math.round(netTotal * idrPerJpy), 'IDR') : '-';
+      }
+
+      const manualUsd = parseMoneyInput(invoiceDraft.manualTotalUsd);
+      const manualIdr = parseMoneyInput(invoiceDraft.manualTotalIdr);
+      const manualJpy = parseMoneyInput(invoiceDraft.manualTotalJpy);
+
+      const chosenUsd = manualUsd > 0 ? formatInvoiceCurrency(manualUsd, 'USD') : autoUsd;
+      const chosenIdr = manualIdr > 0 ? formatInvoiceCurrency(manualIdr, 'IDR') : autoIdr;
+      const chosenJpy = manualJpy > 0 ? formatInvoiceCurrency(manualJpy, 'JPY') : autoJpy;
+
+      const dpConverted = (() => {
+        if (dpAmount <= 0) return '';
+        if (manualIdr > 0) return formatInvoiceCurrency(dpAmount, 'IDR');
+        if (manualUsd > 0) return formatInvoiceCurrency(dpAmount, 'USD');
+        if (manualJpy > 0) return formatInvoiceCurrency(dpAmount, 'JPY');
+        if (baseCode === 'USD') return usdIdr > 0 ? formatInvoiceCurrency(Math.round(dpAmount * usdIdr), 'IDR') : '';
+        if (baseCode === 'IDR') return formatInvoiceCurrency(dpAmount, 'IDR');
+        if (baseCode === 'JPY') return formatInvoiceCurrency(dpAmount, 'JPY');
+        return '';
+      })();
+
+      return {
+        totalUsd: chosenUsd,
+        totalIdr: chosenIdr,
+        totalJpy: chosenJpy,
+        dpConverted
+      };
+    })();
+    const dpConvertedDisplay = fxDisplays.dpConverted || formatInvoiceCurrency(0, normalizeInvoiceCurrencyCode(invoiceDraft.currencyCode) === 'JPY' ? 'JPY' : 'IDR');
+    const dpRow = dpActive
+      ? `<tr><td>DP</td><td style="text-align:right;">${dpConvertedDisplay}</td></tr>`
+      : '';
+
+
+    const itemRows = (() => {
+      const rows = invoiceDraft.items.length
+        ? invoiceDraft.items
+          .map((item, index) => {
+            const qty = Number.isFinite(Number(item.qty)) ? Number(item.qty) : 0;
+            const price = Number.isFinite(Number(item.price)) ? Number(item.price) : 0;
+            const lineTotal = qty * price;
+            return `
+                <tr>
+                  <td>${index + 1}.</td>
+                  <td>${escapeHtml(item.description || '-')}</td>
+                  <td>${formatInvoiceMoney(price)}</td>
+                  <td>${qty}</td>
+                  <td>${formatInvoiceMoney(lineTotal)}</td>
+                </tr>
+              `;
+          })
+        : [];
+
+      if (dpActive && dpAmount > 0) {
+        rows.push(`
+            <tr style="background:#f8fafc;">
+              <td>${rows.length + 1}.</td>
+              <td>Down Payment (DP)</td>
+              <td>-</td>
+              <td>-</td>
+              <td>${formatInvoiceMoney(dpAmount)}</td>
+            </tr>
+        `);
+      }
+
+      if (!rows.length) {
+        return '<tr><td colspan="5" style="text-align:center;padding:12px;color:#888;font-size:14px;">Belum ada item.</td></tr>';
+      }
+      return rows.join('');
+    })();
+
+
+    const paymentInfoLines = (invoiceDraft.notes || '').split(/\r?\n/);
+    while (paymentInfoLines.length && !paymentInfoLines[0].trim()) paymentInfoLines.shift();
+    while (paymentInfoLines.length && !paymentInfoLines[paymentInfoLines.length - 1].trim()) paymentInfoLines.pop();
+    const paymentLines = paymentInfoLines.length
+      ? paymentInfoLines
+        .map((line) => {
+          const trimmed = line.trim();
+          if (!trimmed) return '<br>';
+          return `<p>${escapeHtml(trimmed)}</p>`;
+        })
+        .join('')
+      : '<p style="color:#94a3b8;">Belum ada detail pembayaran.</p>';
+
+
+    const totalsTable = `
+      <table class="total-box">
+        <tr class="dark"><td>Total USD</td><td style="text-align:right;">${fxDisplays.totalUsd}</td></tr>
+        <tr><td>Total IDR</td><td style="text-align:right;">${fxDisplays.totalIdr}</td></tr>
+        <tr class="muted"><td>Total Yen</td><td style="text-align:right;">${fxDisplays.totalJpy || '-'}</td></tr>
+        ${dpRow}
+        <tr class="dark"><td>${finalTotalLabel}</td><td style="text-align:right;">${formatInvoiceMoney(totals.total)}</td></tr>
+      </table>
+    `;
+
+
+    const styles = `
+      @page { margin: 8mm 5mm 10mm; }
+      body { font-family: 'Inter', Arial, sans-serif; background: #f5f6f8; color:rgb(31, 31, 31) margin: 0; font-size: 18px; }
+      .wrap { background: #ffffff; overflow: hidden; margin: 0 auto; }
+      .header { border-bottom: 1px solid #e2e8f0; }
+      .logo-block { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 26px 32px; margin-top: -40px; }
+      .logo-block img { height: 200px; object-fit: contain; }
+      .invoice-bar { display: flex; width: 100%; }
+      .invoice-bar .segment { height: 64px; background: #123c61 }
+      .invoice-bar .segment.flex { 
+        flex: 1; 
+        display: flex; 
+        align-items: center; 
+        justify-content: end; 
+        padding-right: 50px;
+      
+      }
+      .invoice-bar .segment.flex span { color: #123c61; font-size: 48px;  font-weight: 800; padding-bottom: 35px; background: #fff; padding-right: 20px; padding-left: 20px;}
+      .section { padding: 24px 48px 36px; }
+      .bill-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; margin-bottom: 32px; }
+      .label { font-size: 18px; }
+      .value { font-size: 18px; font-weight: 600; color:rgb(31, 31, 31) }
+      .meta { font-size: 18px; color:rgb(31, 31, 31); line-height: 1.8; }
+ 
+      /* TABEL ITEM */
+      .items {
+        width: 100%;
+        border-collapse: collapse;
+        border: 0.5px solid rgb(181, 181, 181);
+      }
+      .items th,
+      .items td {
+        border: 0.5px solid rgb(181, 181, 181);
+      }
+      .items th, .items td {
+        font-size: 18px;
+        padding-bottom: 14px;
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      .items th {  font-size: 18px; background-color:rgba(18, 60, 97, 0.09); }
+      .items td:nth-child(1) { 
+        width: 52px; 
+        text-align: center;
+      }
+      .items td:nth-child(3), .items td:nth-child(5) { text-align: right; }
+      .items td:nth-child(4) { width: 80px; text-align: center; }
+ 
+      /* BARIS TOTAL ATAS */
+      .total-header {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 26px;
+        
+      }
+      .total-header .total-row td {
+        font-size: 18px;
+        font-weight: 700;
+        border: 0.5px solid rgb(181, 181, 181);
+        text-align: center;
+        height: 50px;
+        padding: 0;
+        padding-bottom: 20px;
+      }
+      .total-header .total-row td:first-child {
+        background-color:#123c61;
+        color:#fff;
+      }
+ 
+      /* PEMBAYARAN */
+      .payment-grid { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 32px; }
+      .payment-grid .pay-info { flex: 1; max-width: 60%; }
+      .payment-grid .total-box { margin-left: auto; width: 280px; }
+      .pay-info { font-size: 16px; line-height: 1.8; color:rgb(31, 31, 31) }
+      .pay-info p { margin: 0 0 6px; }
+      .total-box { border: 1px solid rgb(181, 181, 181); font-size: 18px; }
+      .total-box tr td:first-child { font-weight: 600; padding-bottom: 20px }
+      .total-box td { height: 20px; padding-left: 12px; padding-right: 12px; padding-bottom: 20px    }
+      .total-box .dark { background: rgba(18, 60, 97, 0.09); font-weight: 700; height: 20px; padding-left: 12px; padding-right: 12px; padding-bottom: 20px}
+      .total-box .muted { background: #f8fafc; color:rgb(31, 31, 31); }
+      .footnote { color: #c62828; font-size: 14px; font-style: italic; margin-top: 16px; }
+      .item-list { margin-top: 8px; }
+    `;
+
+
+
+    const html = `
+      <div class="wrap">
+        <div class="header">
+          <div class="logo-block">
+            <img src="assets/logo-invoice.png" alt="Logo" onerror="this.style.display='none'">
+          </div>
+          <div class="invoice-bar">
+            <div class="segment flex"><span>${getInvoiceTypeLabel(invoiceDraft.type).toUpperCase()}</span></div>
+          </div>
+        </div>
+ 
+        <div class="section">
+          <div class="bill-grid">
+            <div>
+              <p class="label">Bill To:</p>
+              <p class="value">${escapeHtml(invoiceDraft.client || '')}</p>
+            </div>
+            <div class="meta">
+              <p>${getInvoiceTypeLabel(invoiceDraft.type)}# : <strong>${escapeHtml(invoiceDraft.number || '')}</strong></p>
+              <p>Date : <strong>${formatDateOnly(invoiceDraft.issueDate)}</strong></p>
+            </div>
+          </div>
+ 
+          <div class="bill-grid" style="margin-bottom:24px;">
+            <div class="meta">
+              <p class="label">From To :</p>
+              ${(invoiceDraft.fromName || '').split(/\r?\n/).filter((line) => line.trim()).map((line) => `<p><strong>${escapeHtml(line.trim())}</strong></p>`).join('') || '<p><strong>-</strong></p>'}
+            </div>
+          </div>
+ 
+          <!-- Baris TOTAL di atas tabel item -->
+          <table class="items total-header">
+            <tbody>
+              <tr class="total-row">
+                <td colspan="4">${finalTotalLabel}</td>
+                <td>${formatInvoiceMoney(totals.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+ 
+          <!-- Tabel Item -->
+          <table class="items item-list">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>${itemRows}</tbody>
+          </table>
+ 
+          <!-- Bagian Pembayaran -->
+          <div class="payment-grid">
+            <div class="pay-info">
+              <p class="label" style="margin-bottom:8px;">Payment Inf</p>
+              ${paymentLines}
+              ${invoiceDraft.paymentFootnote ? `<p class="footnote">${escapeHtml(invoiceDraft.paymentFootnote)}</p>` : ''}
+              <p class="footnote">Dalam waktu 10 hari sejak tanggal permintaan pembayaran.</p>
+            </div>
+            <div>${totalsTable}</div>
+          </div>
+
+        <div style="margin-top:32px; text-align:right;">
+          <div style="display:flex; justify-content:flex-end;">
+            <img src="assets/ttd.png" alt="Tanda Tangan" style="height:150px; margin-top:8px;">
+          </div>
+          <p style="font-size:14px; margin-bottom:8px;">PT MABARAKKA MOSLEM MODESTY</p>
+        </div>
+        </div>
+      </div>
+    `;
+
+
+    return { styles, html };
+  };
+
+
+
+  const openInvoicePrint = () => {
+    const printWindow = window.open('', '_blank', 'width=900,height=1200');
+    if (!printWindow) {
+      alert('Popup diblokir browser, izinkan untuk print.');
+      return;
+    }
+    const { styles, html } = buildInvoicePrintTemplate();
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${escapeHtml(invoiceDraft.number || 'Invoice MOSTYCOM')}</title>
+          <style>${styles}</style>
+        </head>
+        <body>
+          ${html}
+          <script>window.print();</script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const downloadInvoicePreviewPdf = async () => {
+    if (typeof window.html2canvas !== 'function') {
+      throw new Error('Fitur html2canvas belum dimuat.');
+    }
+    const JsPdfConstructor = window.jspdf && window.jspdf.jsPDF;
+    if (typeof JsPdfConstructor !== 'function') {
+      throw new Error('Fitur jsPDF belum dimuat.');
+    }
+    const { styles, html } = buildInvoicePrintTemplate();
+    const hiddenContainer = document.createElement('div');
+    hiddenContainer.style.position = 'fixed';
+    hiddenContainer.style.left = '-9999px';
+    hiddenContainer.style.top = '0';
+    hiddenContainer.style.width = '900px';
+    hiddenContainer.innerHTML = `<style>${styles}</style>${html}`;
+    document.body.appendChild(hiddenContainer);
+    const target = hiddenContainer.querySelector('.wrap') || hiddenContainer;
+    const canvas = await window.html2canvas(target, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true
+    });
+    document.body.removeChild(hiddenContainer);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new JsPdfConstructor('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const availableWidth = pageWidth - (margin * 2);
+    const availableHeight = pageHeight - (margin * 2);
+    const canvasRatio = canvas.height / canvas.width;
+    let renderWidth = availableWidth;
+    let renderHeight = renderWidth * canvasRatio;
+    if (renderHeight > availableHeight) {
+      renderHeight = availableHeight;
+      renderWidth = renderHeight / canvasRatio;
+    }
+    const offsetX = (pageWidth - renderWidth) / 2;
+    const offsetY = margin;
+    pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderWidth, renderHeight, '', 'FAST');
+    pdf.save(`${getInvoiceDownloadName()}.pdf`);
+  };
+
+  // Inisialisasi invoice setelah fungsi helper siap
+  if (invoiceForm) {
+    renderInvoiceItemsForm();
+    hydrateInvoiceForm();
+    renderInvoicePreview();
+    updateInvoiceCurrencyUi();
+    if (invoiceCurrencySelect) {
+      invoiceCurrencySelect.value = invoiceDraft.currencyCode || normalizeInvoiceCurrencyCode();
+      invoiceCurrencySelect.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!target) return;
+        const selectedCode = normalizeInvoiceCurrencyCode(target.value);
+        invoiceDraft.currencyCode = selectedCode;
+        invoiceDraft.currencySymbol = getInvoiceCurrencyConfig(selectedCode).symbol;
+        target.value = selectedCode;
+        renderInvoiceItemsForm();
+        renderInvoicePreview(true);
+        updateInvoiceCurrencyUi();
+        showInvoiceFormStatus(`Mata uang: ${getInvoiceCurrencyConfig(selectedCode).label}`);
+        showInvoicePreviewStatus('Nominal mengikuti mata uang baru');
+      });
+    }
+    if (invoiceTypeSelect) {
+      invoiceTypeSelect.value = invoiceDraft.type || 'BILLING';
+      invoiceTypeSelect.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!target) return;
+        const value = target.value;
+        if (!INVOICE_TYPES[value]) return;
+        invoiceDraft.type = value;
+        target.value = value;
+        renderInvoicePreview(true);
+        showInvoiceFormStatus(`Tipe tagihan: ${getInvoiceTypeLabel(value)}`);
+        showInvoicePreviewStatus(`${getInvoiceTypeLabel(value)} aktif`);
+      });
+    }
+  }
 
   const mapServerRouteToDraft = (route) => ({
     nama_rute: route?.nama_rute || '',
@@ -1745,6 +2757,166 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  if (invoiceAddItemBtn) {
+    invoiceAddItemBtn.addEventListener('click', () => {
+      invoiceDraft.items.push(createEmptyInvoiceItem(`Item ${invoiceDraft.items.length + 1}`, 1, 0));
+      renderInvoiceItemsForm();
+      renderInvoicePreview(true);
+    });
+  }
+
+  if (invoiceItemsContainer) {
+    invoiceItemsContainer.addEventListener('input', (event) => {
+      const target = event.target;
+      const field = target.dataset.invoiceField;
+      const index = Number(target.dataset.invoiceIndex);
+      if (!field || Number.isNaN(index) || !invoiceDraft.items[index]) return;
+      const value = target.value;
+      if (field === 'qty' || field === 'price') {
+        invoiceDraft.items[index][field] = Number.isFinite(Number(value)) ? Number(value) : 0;
+        updateInvoiceLineTotal(index);
+      } else {
+        invoiceDraft.items[index][field] = value;
+      }
+      renderInvoicePreview();
+    });
+
+    invoiceItemsContainer.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-invoice-item-remove]');
+      if (!button) return;
+      const index = Number(button.dataset.invoiceItemRemove);
+      if (Number.isNaN(index)) return;
+      invoiceDraft.items.splice(index, 1);
+      renderInvoiceItemsForm();
+      renderInvoicePreview(true);
+    });
+  }
+
+  if (invoiceForm) {
+    const invoiceFieldMap = {
+      'invoice-number': 'number',
+      'invoice-date': 'issueDate',
+      'invoice-client': 'client',
+      'invoice-notes': 'notes',
+      'invoice-from': 'fromName',
+      'invoice-fx-rate': 'fxRate',
+      'invoice-fx-rate-jpy': 'fxRateJpy',
+      'invoice-total-usd': 'manualTotalUsd',
+      'invoice-total-idr': 'manualTotalIdr',
+      'invoice-total-jpy': 'manualTotalJpy'
+    };
+    const numericInvoiceFields = ['invoice-fx-rate', 'invoice-fx-rate-jpy', 'invoice-total-usd', 'invoice-total-idr', 'invoice-total-jpy'];
+
+    invoiceForm.addEventListener('input', (event) => {
+      const target = event.target;
+      if (target.dataset.invoiceField) return;
+      const mappedField = invoiceFieldMap[target.name];
+      if (!mappedField) return;
+      if (numericInvoiceFields.includes(target.name)) {
+        invoiceDraft[mappedField] = parseMoneyInput(target.value);
+      } else {
+        if (target.name === 'invoice-from') {
+          invoiceDraft.fromName = target.value || '';
+          invoiceDraft.fromCompany = '';
+        } else {
+          invoiceDraft[mappedField] = target.value;
+        }
+      }
+      renderInvoicePreview();
+    });
+
+    invoiceForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      renderInvoicePreview(true);
+      showInvoiceFormStatus('Invoice diperbarui');
+    });
+  }
+
+  if (invoiceDpToggle) {
+    invoiceDpToggle.addEventListener('change', (event) => {
+      invoiceDraft.dpEnabled = event.target.checked;
+      if (!invoiceDraft.dpEnabled) {
+        invoiceDraft.dpAmount = 0;
+      }
+      syncInvoiceDpUi();
+      renderInvoicePreview(true);
+      showInvoiceFormStatus(invoiceDraft.dpEnabled ? 'Down Payment diaktifkan' : 'Down Payment dimatikan');
+    });
+  }
+
+  if (invoiceDpAmountInput) {
+    invoiceDpAmountInput.addEventListener('input', (event) => {
+      if (!invoiceDraft.dpEnabled) return;
+      const value = parseMoneyInput(event.target.value);
+      invoiceDraft.dpAmount = value >= 0 ? value : 0;
+      renderInvoicePreview();
+      syncInvoiceDpUi();
+    });
+  }
+
+  // Tombol ambil kurs otomatis dihilangkan dari UI; jika masih ada di DOM lama, abaikan.
+
+  if (invoiceResetBtn) {
+    invoiceResetBtn.addEventListener('click', () => {
+      resetInvoiceDraft();
+    });
+  }
+
+  if (invoiceFetchRateBtn) {
+    invoiceFetchRateBtn.addEventListener('click', async () => {
+      const originalText = invoiceFetchRateBtn.textContent;
+      invoiceFetchRateBtn.disabled = true;
+      invoiceFetchRateBtn.textContent = 'Memuat kurs...';
+      try {
+        const { idr, idrPerJpy } = await fetchUsdRates();
+        invoiceDraft.fxRate = idr;
+        invoiceDraft.fxRateJpy = idrPerJpy;
+        if (invoiceFxRateInput) invoiceFxRateInput.value = normalizeInputValue(idr);
+        if (invoiceFxRateJpyInput) invoiceFxRateJpyInput.value = normalizeInputValue(idrPerJpy);
+        if (invoiceRateUsdInput) invoiceRateUsdInput.value = '1';
+        renderInvoicePreview(true);
+        showInvoiceFormStatus('Kurs USD/IDR & JPY/IDR diperbarui');
+      } catch (error) {
+        console.error('Gagal mengambil kurs otomatis:', error);
+        alert(error.message || 'Gagal mengunduh kurs otomatis.');
+      } finally {
+        invoiceFetchRateBtn.disabled = false;
+        invoiceFetchRateBtn.textContent = originalText;
+      }
+    });
+  }
+
+  if (invoicePrintBtn) {
+    invoicePrintBtn.addEventListener('click', () => {
+      openInvoicePrint();
+    });
+  }
+
+  if (invoicePdfBtn) {
+    invoicePdfBtn.addEventListener('click', () => {
+      openInvoicePrint();
+    });
+  }
+
+  if (invoiceDownloadBtn) {
+    invoiceDownloadBtn.addEventListener('click', async () => {
+      if (invoiceDownloadBtn.disabled) return;
+      const originalText = invoiceDownloadBtn.textContent;
+      invoiceDownloadBtn.disabled = true;
+      invoiceDownloadBtn.textContent = 'Menyiapkan...';
+      try {
+        await downloadInvoicePreviewPdf();
+        showInvoicePreviewStatus('PDF diunduh');
+      } catch (error) {
+        console.error('Gagal mengunduh PDF invoice:', error);
+        alert(error.message || 'Gagal mengunduh PDF invoice.');
+      } finally {
+        invoiceDownloadBtn.disabled = false;
+        invoiceDownloadBtn.textContent = originalText;
+      }
+    });
+  }
+
   if (tripForm) {
     tripForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -2263,3 +3435,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
+
+
+
+
+
+
+
+
+
+
+
